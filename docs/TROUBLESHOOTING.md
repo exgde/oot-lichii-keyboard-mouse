@@ -1,8 +1,16 @@
 # Troubleshooting
 
-**The cursor does not hide / the mouse does not turn the camera.** In a normal Lichii mouse panning is not saved: press **Ctrl+F9** every time you start the game. With the [patches](../lichii-patches/README.md) it turns on by itself and the cursor hides, as long as player 1's right stick is mapped to the mouse (`player_0_rstick` starts with `engine:mouse`). If the emulated mouse (`mouse_enabled`) is on, panning stays off: turn it off in Configure → Controls → Advanced.
+**The cursor does not hide / the mouse does not turn the camera.** In a normal Lichii mouse panning is not saved: it is off every time the emulator starts. Click the game window and press **Ctrl+F9** once. Then:
 
-**The icons are still the Switch/PlayStation ones.** Look in `user\log\eden_log.txt` for the line `LayeredFS layer 'ButtonPrompts-KeyboardMouse'`. Without it the folder is not in `user\load\0400486024DEC000\` or the inner path is wrong (it needs `ButtonPrompts-KeyboardMouse\romfs\Font2\...` and `...\romfs\UI\...`). If more than one `ButtonPrompts-*` shows up in the log, keep only one (a Lichii without the patches applies all of them).
+- Ctrl+F9 only reaches the emulator when its window is in front. Click the game window first.
+- It toggles: if the cursor was hidden and came back, you pressed it twice. Press it once more.
+- Keep **Hide mouse on inactivity** ticked (Configure → General → UI). The cursor hides a few seconds after the mouse stops.
+- Do not press it during the first-boot loading: wait until you are in the game.
+- If the emulated mouse (`mouse_enabled`) is on, panning stays off: turn it off in Configure → Controls → Advanced.
+
+With the [patches](../lichii-patches/README.md) panning turns on by itself and the cursor hides, as long as player 1's right stick is mapped to the mouse (`player_0_rstick` starts with `engine:mouse`).
+
+**The icons are still the Switch/PlayStation ones.** The folder is not where the emulator looks. It must be `user\load\0400486024DEC000\ButtonPrompts-KeyboardMouse\romfs\Font2\...` and `...\romfs\UI\...` (see the tree in [INSTALLATION.md](INSTALLATION.md)), and the emulator must have been closed and restarted after copying. Some builds print `LayeredFS layer 'ButtonPrompts-KeyboardMouse'` in `user\log\eden_log.txt`; others only print `LayeredFS patches applied successfully`. If more than one `ButtonPrompts-*` folder exists, keep only one (a Lichii without the patches applies all of them).
 
 **The icons are a mix of keyboard and controller.** Another `ButtonPrompts-*` folder is in `load`. Move the others out.
 

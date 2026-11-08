@@ -9,7 +9,7 @@ Play *OOT* (Nintendo Switch 2, title ID `0400486024DEC000`) on **Lichii** (an Ed
 | **Lichii patches** (`lichii-patches/`) | mouse acceleration; mouse panning turns on by itself and the cursor hides; a "Keyboard and mouse" option for the icons | yes (optional) |
 | **Tools** (`tools/`) | build the mod from **your own** `.nup`, so you can change the keys and redo the icons | no |
 
-> The patches are not part of any prebuilt Lichii release. If you do not compile the emulator yourself, skip them: the profile and the icon mod work on any build, you just press **Ctrl+F9** at every launch for mouse panning and enable **"Hide mouse on inactivity"** to hide the cursor. With an unpatched build the `ButtonPrompts-KeyboardMouse` folder is applied as an ordinary mod, so keep it as the only `ButtonPrompts-*` folder.
+> The patches are not part of any prebuilt Lichii release. If you do not compile the emulator yourself, skip them: the profile and the icon mod work on any build (tested on Fritchii v4), you just press **Ctrl+F9** once at every launch for mouse panning, with **"Hide mouse on inactivity"** enabled to hide the cursor. With an unpatched build the `ButtonPrompts-KeyboardMouse` folder is applied as an ordinary mod, so keep it as the only `ButtonPrompts-*` folder.
 
 > Fan project, not affiliated with Nintendo or with Lichii/Eden. Read the [NOTICE](NOTICE.md).
 
@@ -35,11 +35,14 @@ Ctrl and Alt are not used on purpose: in Lichii, Ctrl+Q quits the emulator and A
 
 ## Quick install
 
-1. Download `OoT-ButtonPrompts-KeyboardMouse.zip` from [Releases](../../releases) (or build it from your own game, see [docs/BUILD-THE-MOD.md](docs/BUILD-THE-MOD.md)) and copy the `ButtonPrompts-KeyboardMouse` folder to `<Lichii>\user\load\0400486024DEC000\`.
-2. Copy `profile/OoT-Keyboard-Mouse.ini` to `<Lichii>\user\config\input\`, open **Emulation → Configure → Controls → Player 1**, pick the profile `OoT-Keyboard-Mouse` and click **Load**.
-3. Start the game and press **Ctrl+F9** (mouse panning), unless you run a Lichii with the patches.
+`<Lichii>` is the folder that holds `lichii.exe` (it has a `user` folder next to it). Close the emulator first.
 
-Full walkthrough, including how to check the log: [docs/INSTALLATION.md](docs/INSTALLATION.md).
+1. **Icons.** Download `OoT-ButtonPrompts-KeyboardMouse.zip` from [Releases](../../releases), extract it, and copy the whole `ButtonPrompts-KeyboardMouse` folder into `<Lichii>\user\load\0400486024DEC000\`. Keep it as the only `ButtonPrompts-*` folder there.
+2. **Keys.** Copy `profile/OoT-Keyboard-Mouse.ini` from this repository into `<Lichii>\user\config\input\`. In Lichii open **Emulation → Configure → Controls → Player 1**, choose the profile `OoT-Keyboard-Mouse` in the Profile box, click **Load**, then **OK**.
+3. **Cursor.** In **Emulation → Configure → General → UI** keep **Hide mouse on inactivity** ticked.
+4. **Every time you play:** start the game, wait until you are in it, **click the game window**, and press **Ctrl+F9 once**. The mouse now turns the camera and the cursor hides after a few seconds. (Ctrl+F9 toggles: press it again if the cursor came back.)
+
+The exact folder tree, how to find the data folder and the in-game checks are in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## Change keys, sensitivity and acceleration
 

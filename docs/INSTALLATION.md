@@ -1,47 +1,82 @@
 # Installation
 
-For Lichii "build 116" (an Eden fork) and OOT for Switch 2, version 2.0.0 (`[0400486024dec000][v131072].nup`). In portable mode the folders below live in `user\` next to `lichii.exe`; otherwise use **right-click the game → Open Mod Data Location** and the emulator's own config folder.
+Step-by-step guide. It takes about five minutes. You need:
 
-## 1. The icon mod
+- **Lichii** (or a Lichii fork such as Fritchii) for Windows, closed while you copy files.
+- *OOT* for Switch 2, version 2.0.0 (`[0400486024dec000][v131072].nup`), already working in the emulator.
+- `OoT-ButtonPrompts-KeyboardMouse.zip` from [Releases](../../releases) (or your own build, see [BUILD-THE-MOD.md](BUILD-THE-MOD.md)).
 
-Get the `ButtonPrompts-KeyboardMouse` folder in **one** of these ways:
+Tested on Fritchii v4 and on a locally built Lichii "build 116".
 
-- **Release:** download `OoT-ButtonPrompts-KeyboardMouse.zip` from [Releases](../../releases) and extract it.
-- **From your game:** `python tools/build_mod.py --nup "<your .nup>" --out output` ([BUILD-THE-MOD.md](BUILD-THE-MOD.md)). Use this if you change the keys.
+## 0. Find your Lichii data folder
 
-Copy the folder to:
+Below, `<Lichii>` means the folder that holds `lichii.exe`.
 
-```
-<Lichii>\user\load\0400486024DEC000\ButtonPrompts-KeyboardMouse\romfs\Font2\...
-<Lichii>\user\load\0400486024DEC000\ButtonPrompts-KeyboardMouse\romfs\UI\...
-```
+- If there is a **`user`** folder next to `lichii.exe`, that is where everything goes (`<Lichii>\user\...`). This is portable mode and the usual case.
+- If not, use the emulator itself: **right-click the game → Open Mod Data Location**. That opens `...\load\0400486024DEC000`, the folder used in step 1. The config folder is two levels up, then `config`.
 
-**Important:** keep only **one** `ButtonPrompts-*` folder in `load` (PlayStation, Xbox, Steam Deck, Keyboard…). On a Lichii without the patches every `ButtonPrompts-*` folder is applied as an ordinary mod, and with two of them the last one alphabetically wins. Move the others out of `load`.
+## 1. Install the icon mod
 
-On a Lichii **with the patches** ([lichii-patches](../lichii-patches/README.md)) all the `ButtonPrompts-*` folders can stay, and you choose in **Graphics → Advanced → "OOT: button icons" = Keyboard and mouse**.
+1. Extract the zip. Inside is a folder named **`ButtonPrompts-KeyboardMouse`**.
+2. Copy that whole folder into:
 
-## 2. The input profile
+   ```
+   <Lichii>\user\load\0400486024DEC000\
+   ```
 
-1. Copy `profile/OoT-Keyboard-Mouse.ini` to `<Lichii>\user\config\input\` (create the `input` folder if it does not exist).
-2. **Emulation → Configure → Controls → Player 1** (Pro Controller type): under **Profile** pick `OoT-Keyboard-Mouse`, click **Load**, then **OK**.
+3. Check the result. The tree must look exactly like this (two folders inside `romfs`, not more, not fewer levels):
 
-This writes the layout into `qt-config.ini`. If you were using a gamepad (DualSense etc.) its layout is replaced: keep a copy of your `qt-config.ini` first, or save a profile of your gamepad layout (**New**) so you can switch back.
+   ```
+   <Lichii>\user\load\0400486024DEC000\
+   └── ButtonPrompts-KeyboardMouse\
+       └── romfs\
+           ├── Font2\Scalable\External.Nin_Ounce_NVN2.bfotf.zs
+           └── UI\Layout2Archive\Common.Product.100.Nin_Ounce_NVN2.bntx.zs
+   ```
 
-## 3. Mouse panning (camera)
+4. **Keep only one `ButtonPrompts-*` folder** in `0400486024DEC000` (move any PlayStation, Xbox or Steam Deck button-prompt mods somewhere else). Two of them replace the same game files and only one wins.
 
-Without the patches the mouse only acts as the right stick while **mouse panning** is on, and it is **not saved**: press **Ctrl+F9** every time you start the game (it toggles). The cursor only hides if **"Hide mouse on inactivity"** (Configure → General → UI) is enabled.
+## 2. Install the input profile
 
-With the patches, mouse panning turns on by itself when player 1's right stick is mapped to the mouse, and the cursor hides immediately. Ctrl+F9 still toggles it.
+1. Copy `profile\OoT-Keyboard-Mouse.ini` (from this repository) into `<Lichii>\user\config\input\`. Create the `input` folder if it does not exist.
+2. Open Lichii, then **Emulation → Configure → Controls → Player 1**.
+3. Make sure the controller type is **Pro Controller**.
+4. In the **Profile** box choose `OoT-Keyboard-Mouse` and click **Load**, then **OK**.
 
-## 4. Check it works
+This overwrites your Player 1 layout. If you use a gamepad, first save its layout as a profile (**New**) or keep a copy of `user\config\qt-config.ini`.
 
-- In the emulator log (`user\log\eden_log.txt`) look for: `LayeredFS layer 'ButtonPrompts-KeyboardMouse'`.
-- In game: the action button shows a key (Space), the attack button shows a mouse with the left button filled, and **+ → Basic Controls** shows a keyboard and a mouse with guide lines to each key.
-- Move the mouse: the camera turns and no cursor is visible.
+## 3. Check the cursor setting
+
+**Emulation → Configure → General → UI**: tick **Hide mouse on inactivity** (it is on by default). Click **OK**.
+
+## 4. Start the game and turn on mouse panning (every launch)
+
+The mouse only turns the camera while **mouse panning** is on, and Lichii does not remember it: it is off every time the emulator starts. So, each time:
+
+1. Start the game and wait until you are in the game (the first launch builds shaders and can take several minutes).
+2. **Click on the game window** so the emulator is the window in front.
+3. Press **Ctrl+F9** once.
+
+Now moving the mouse turns the camera, and after a few seconds without moving it the cursor disappears.
+
+- Ctrl+F9 **toggles**. Pressing it a second time turns panning off and the cursor comes back. If that happens, press it again.
+- Ctrl+F9 only works when the emulator window is in front. If another window has focus the key goes to that window instead.
+- A Lichii compiled with the [patches](../lichii-patches/README.md) does steps 2–3 by itself (panning on, cursor hidden). Official and prebuilt builds do not have them.
+
+## 5. Check that it works
+
+In game:
+
+- Moving the mouse turns the camera and no cursor is visible.
+- WASD moves the green hat kid, left click attacks, right click uses the item.
+- The action button shows a key (Space) and the attack button shows a mouse with the left button filled.
+- **Enter → Basic Controls** shows a keyboard and a mouse with guide lines to each key.
+
+If you see Switch or PlayStation buttons instead, the icon mod is not loaded: see [TROUBLESHOOTING.md](TROUBLESHOOTING.md). The log (`user\log\eden_log.txt`) of some builds prints `LayeredFS layer 'ButtonPrompts-KeyboardMouse'`; others only print `LayeredFS patches applied successfully`, so the in-game check above is the one to trust.
 
 ## Uninstall
 
-Delete the `ButtonPrompts-KeyboardMouse` folder from `load`, restore your gamepad layout in **Emulation → Configure → Controls**, and restart the game.
+Delete the `ButtonPrompts-KeyboardMouse` folder from `load\0400486024DEC000`, restore your gamepad layout in **Emulation → Configure → Controls**, and restart the game.
 
 ## Cautions
 
