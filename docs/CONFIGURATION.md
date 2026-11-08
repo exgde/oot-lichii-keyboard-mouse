@@ -1,8 +1,46 @@
 # Configuration: keys, sensitivity and acceleration
 
-## 1. Change a key or mouse button
+## The settings file
 
-### In the Lichii UI (easiest)
+Everything you normally want to change is in **`OoT-Keyboard-Mouse-Settings.ini`**, in Lichii's Root Data Folder. To change something: edit the file in Notepad, save, **close Lichii**, double-click **`Apply-Settings.bat`**.
+
+The script checks the file first. If it has a mistake (or Lichii is open) it stops and changes nothing. Otherwise it writes the keys and the mouse values into `config\qt-config.ini` (Player 1) and into the profile `config\input\OoT-Keyboard-Mouse.ini`, and keeps your previous settings as `config\qt-config.ini.pre-keyboard-mouse`.
+
+Format: `name = value`, one per line. A `;` starts a comment. Delete a line to get its default. Names and values are not case sensitive; for numbers both `3.3` and `3,3` work.
+
+**Key names** (any of these as a value): `a` … `z`, `0` … `9`, `space`, `enter`, `tab`, `backspace`, `esc`, `shift`, `ctrl`, `alt`, `capslock`, `up`, `down`, `left`, `right`, `insert`, `delete`, `home`, `end`, `pageup`, `pagedown`, `f1` … `f12`, `comma`, `period`, `minus`, `equals`, `slash`, `backslash`, `semicolon`, `apostrophe`, `bracketleft`, `bracketright`, `grave`; mouse buttons `mouse_left`, `mouse_right`, `mouse_middle`, `mouse_back`, `mouse_forward`; `none` to leave a button unassigned. A raw Qt code also works: `code:16777250`. Avoid `ctrl`, `alt` and `esc` (Lichii uses them: Ctrl+Q quits, Ctrl+F9 toggles mouse panning, Alt opens the menu bar, Esc leaves fullscreen); the script warns you.
+
+| Setting | Default | Switch button / meaning |
+|---|---|---|
+| `button_y` | `mouse_left` | Y: attack |
+| `button_a` | `space` | A: action, hold to run |
+| `button_b`, `button_x` | `c`, `r` | B, X (no label in the game) |
+| `button_zl` | `shift` | ZL: hold to target |
+| `button_zr` | `mouse_right` | ZR: use item |
+| `button_l`, `button_r` | `q`, `e` | L, R: quick select items |
+| `button_r3` | `mouse_middle` | right stick press: reset the camera |
+| `button_l3` | `none` | left stick press |
+| `button_plus`, `button_minus` | `enter`, `tab` | +: menu, −: map |
+| `dpad_up`, `dpad_left`, `dpad_right`, `dpad_down` | `1`, `2`, `3`, `4` | D-pad: accessory, ocarina, Navi, boots |
+| `button_home`, `button_screenshot` | `none` | Home, Capture |
+| `move_up`, `move_down`, `move_left`, `move_right` | `w`, `s`, `a`, `d` | left stick |
+| `walk_key` | `z` | hold to walk slowly |
+| `walk_speed` | `0.5` | how slow: `0.1` … `1.0` (1.0 = no change) |
+| `mouse_sens` | `5.0` | camera speed, `1.0` (slow) … `10.0` (fast). The number × 10 is Lichii's sensitivity (1–100), so `5.0` is its default 50 |
+| `mouse_sens_x`, `mouse_sens_y` | empty | left/right and up/down speed on their own (empty = use `mouse_sens`) |
+| `mouse_invert_y` | `false` | `true`: moving the mouse up looks down |
+| `mouse_deadzone_boost` | `20` | 0–100, Lichii's "deadzone counterweight" (see [Mouse speed and feel](#mouse-speed-and-feel)) |
+| `mouse_stop_speed` | `18` | 0–100, Lichii's "decay strength": higher = the camera stops sooner |
+| `mouse_min_decay` | `6` | 0–100, Lichii's "minimum decay" |
+| `hide_cursor` | `true` | hide the pointer after a few idle seconds ("Hide mouse on inactivity") |
+
+Not in the file, on purpose: **mouse acceleration** exists only in a patched Lichii ([below](#mouse-acceleration-lichii-patches)); **mouse panning** is switched on with Ctrl+F9 because Lichii does not save it; and the **pictures** drawn in the game cannot follow your keys ([below](#after-changing-keys-update-the-icons)).
+
+The sections that follow explain how it works underneath and how to change things without the script.
+
+## Advanced: change a key in the Lichii UI or by hand
+
+### In the Lichii UI (easiest without the script)
 
 **Emulation → Configure → Controls → Player 1**: click the button you want to change (for example "A") and press the new key or mouse button. Right-click a button to clear it. **Save** the result as a profile (Profile → New) so you do not lose it.
 
@@ -54,11 +92,11 @@ After editing, **Load** the profile again in Configure → Controls (or copy the
 
 ### After changing keys: update the icons
 
-The icons drawn in the game (the keys shown in the interface) do not change by themselves. To make them show your keys, edit the layout in `tools/build_fonts_kbm.py` (function `glyph_map`), `tools/build_mods_kbm.py` (`symbols`) and `tools/make_ctrl_kbm.py` (`KEY`), then build the mod again: [BUILD-THE-MOD.md](BUILD-THE-MOD.md).
+The icons drawn in the game (the keys shown in the interface) are pictures of the default keys and do not change by themselves, whether you rebind in the settings file, in the Lichii UI or in the profile. To make them show your keys, edit the layout in `tools/build_fonts_kbm.py` (function `glyph_map`), `tools/build_mods_kbm.py` (`symbols`) and `tools/make_ctrl_kbm.py` (`KEY`), then build the mod again: [BUILD-THE-MOD.md](BUILD-THE-MOD.md).
 
-## 2. Mouse sensitivity
+## Mouse speed and feel
 
-**Emulation → Configure → Controls → Player 1 → "Mouse panning" button** opens the settings. They are also in `qt-config.ini`, section `[Controls]`, as a pair `key\default=false` + `key=value`:
+`mouse_sens`, `mouse_deadzone_boost`, `mouse_stop_speed` and `mouse_min_decay` in the settings file are these Lichii values. You can also change them in **Emulation → Configure → Controls → Player 1 → "Mouse panning" button**. They are stored in `qt-config.ini`, section `[Controls]`, as a pair `key\default=false` + `key=value`:
 
 | Setting | Key | Default | What it does |
 |---|---|---|---|
@@ -72,7 +110,7 @@ How it works underneath: each mouse movement adds `pixels × sensitivity × 0.00
 
 Tuning recipe: (1) set acceleration to 0; (2) raise the sensitivity until a 180° turn takes a comfortable mouse movement; (3) adjust the deadzone counterweight until fine aiming responds; (4) only then raise acceleration.
 
-## 3. Mouse acceleration (Lichii patches)
+## Mouse acceleration (Lichii patches)
 
 When the mouse moves **fast** the camera turns even faster; moving slowly it stays 1:1 so aiming stays precise. Lichii measures the pointer speed (pixels per millisecond, smoothed over about 3 events) and multiplies the movement by a gain:
 
@@ -86,7 +124,7 @@ When the mouse moves **fast** the camera turns even faster; moving slowly it sta
 
 After 80 ms without movement the speed resets. The stick ceiling still applies: acceleration makes a fast movement reach the maximum sooner, it does not go past it. To change the curve, edit the constants at the top of `src/input_common/drivers/mouse.cpp` (`acceleration_threshold`, `acceleration_full_speed`, `acceleration_max_extra_gain`) and rebuild.
 
-## 4. Useful Lichii hotkeys
+## Useful Lichii hotkeys
 
 | Hotkey | Action |
 |---|---|

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.0 – 2026-11-08
+
+One settings file for everything. The mod files (icons, controls screen) are unchanged and identical to v1.0.0.
+
+- New **`OoT-Keyboard-Mouse-Settings.ini`**: every key and mouse value as `name = value` lines in a plain text file (`button_a = shift`, `mouse_sens = 3.3`, `mouse_invert_y = true`, …). Documented inside the file and in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+- New **`Apply-Settings.bat`** (runs `Apply-Settings.ps1`, PowerShell 5.1 or newer, already part of Windows): checks the settings file, then writes Player 1's keys and the mouse values straight into Lichii's `qt-config.ini` and the profile `config\input\OoT-Keyboard-Mouse.ini`. It stops if Lichii is open or the file has a mistake, and keeps a copy of the old settings as `config\qt-config.ini.pre-keyboard-mouse`. With the default settings it produces a profile identical to `profile/OoT-Keyboard-Mouse.ini`.
+- The installation is still 5 steps, but step 4 is now "double-click `Apply-Settings.bat`" instead of loading the profile by hand in Configure → Controls. The profile route still works and is documented as the backup way.
+- The zip now holds the settings file and the script at its top level; step 3 is "select everything in the extracted folder and drag it into the Root Data Folder".
+
 ## v1.2.0 – 2026-11-08
 
 The mod files (icons, controls screen, input profile) are unchanged and identical to v1.0.0.
