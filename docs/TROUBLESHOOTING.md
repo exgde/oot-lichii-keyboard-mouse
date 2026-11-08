@@ -1,5 +1,11 @@
 # Troubleshooting
 
+**I cannot find the `.ini` / the keys file.** It is inside the release zip at `config\input\OoT-Keyboard-Mouse.ini`, it is also attached to the release as a separate file, and it lives in this repository at [`profile/OoT-Keyboard-Mouse.ini`](../profile/OoT-Keyboard-Mouse.ini). It goes in `config\input` inside Lichii's Root Data Folder (File → Open Lichii Folders → Root Data Folder).
+
+**The profile `OoT-Keyboard-Mouse` is not in the Profile list.** The file is not in `config\input`, or Lichii was open when you copied it. Check the path and close and reopen Lichii.
+
+**I cannot find the mod folder in the repository.** The icon files come from the game, so they are not stored in the code folders. They are only in the release zip (`load\0400486024DEC000\ButtonPrompts-KeyboardMouse`).
+
 **The cursor does not hide / the mouse does not turn the camera.** In a normal Lichii mouse panning is not saved: it is off every time the emulator starts. Click the game window and press **Ctrl+F9** once. Then:
 
 - Ctrl+F9 only reaches the emulator when its window is in front. Click the game window first.

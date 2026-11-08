@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.0 – 2026-11-08
+
+The mod files (icons, controls screen, input profile) are unchanged and identical to v1.0.0.
+
+- The release now ships **one zip with everything**, `OoT-KeyboardMouse-v1.2.0.zip`: the icons and the keys file (`OoT-Keyboard-Mouse.ini`) already in the right folders (`load\...` and `config\input\...`). Installing is copying two folders. The `.ini` is also attached to the release on its own.
+- The installation guide is down to 5 steps and uses **File → Open Lichii Folders → Root Data Folder** instead of navigating up from the mod folder.
+- Troubleshooting: where the `.ini` is, why the mod files are not in the code folders, and what to do when the profile is not listed.
+
 ## v1.1.0 – 2026-11-08
 
 Documentation release. The mod files (icons, controls screen, input profile) are unchanged and byte-identical to v1.0.0.

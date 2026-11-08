@@ -1,65 +1,71 @@
 # Installation
 
-Six short steps, about five minutes. Close Lichii before you start.
+Five short steps, about five minutes. Close Lichii before you start.
 
 **You need:**
 
-- Lichii (or a fork such as Fritchii) for Windows, with *OOT* for Switch 2 already running in it (version 2.0.0, `[0400486024dec000][v131072].nup`).
-- Two files, downloaded in Step 1.
+- Lichii (or a fork such as Fritchii) for Windows, with OOT for Switch 2 already running in it (version 2.0.0, `[0400486024dec000][v131072].nup`).
+- One download: `OoT-KeyboardMouse-v1.2.0.zip` from the [latest release](../../releases/latest) (scroll down to **Assets**).
 
 Tested on Fritchii v4 and on a locally built Lichii "build 116".
 
-## Step 1 – Download two files
+The mod files come from the game, so they are **not** in the code folders of this repository. They are only in the release zip. The keys file is also in this repository as [`profile/OoT-Keyboard-Mouse.ini`](../profile/OoT-Keyboard-Mouse.ini) and is attached to the release on its own.
 
-- **The mod:** open the [latest release](../../releases/latest), scroll down to **Assets** and click `OoT-ButtonPrompts-KeyboardMouse.zip`.
-- **The keys file:** [OoT-Keyboard-Mouse.ini](https://github.com/exgde/oot-lichii-keyboard-mouse/raw/main/profile/OoT-Keyboard-Mouse.ini). Right-click the link → **Save link as…**
-
-(Prefer to build the icons yourself, for example after changing keys? See [BUILD-THE-MOD.md](BUILD-THE-MOD.md).)
-
-## Step 2 – Open the game's mod folder
-
-Open Lichii, right-click the game (OOT) in the game list and click **Open Mod Data Location**. A Windows folder opens. Its name ends in `0400486024DEC000`. Leave it open.
-
-## Step 3 – Add the icons
-
-1. Right-click the zip you downloaded → **Extract All**.
-2. Open the extracted folder and drag the folder **`ButtonPrompts-KeyboardMouse`** into the folder from Step 2.
-3. Check: inside `0400486024DEC000` there is now `ButtonPrompts-KeyboardMouse`, and inside it a folder called `romfs`.
-
-If other folders in `0400486024DEC000` start with `ButtonPrompts-` (PlayStation, Xbox, Steam Deck…), move them out. Two of them replace the same game files and only one wins.
-
-## Step 4 – Add the keys file
-
-1. Go up two folders, to the one that contains `load`. In the address bar at the top, click the name just before `load` (it is usually `user`).
-2. Open `config`, then `input`. If `input` does not exist, create it: right-click → **New** → **Folder**, and name it `input`.
-3. Put `OoT-Keyboard-Mouse.ini` there.
-
-When you are done the folders look like this:
+## What is inside the zip
 
 ```
-user
+OoT-KeyboardMouse-v1.2.0\
+├─ READ-ME-FIRST.txt
+├─ load\0400486024DEC000\ButtonPrompts-KeyboardMouse\romfs\...    the icons
+└─ config\input\OoT-Keyboard-Mouse.ini                            the keys
+```
+
+The two folders `load` and `config` have the same names and layout as Lichii's own data folder, so installing is just copying them in.
+
+## Step 1 – Extract the zip
+
+Right-click the zip → **Extract All**. Do not drag files out of the zip window: extract first.
+
+## Step 2 – Open Lichii's data folder
+
+Open Lichii and click **File → Open Lichii Folders → Root Data Folder**. A Windows folder opens. This is where Lichii keeps its settings, mods and saves (a folder named `user` next to `lichii.exe` in portable setups). Leave it open next to the extracted folder.
+
+## Step 3 – Copy `load` and `config` into it
+
+Select the folders **`load`** and **`config`** from the extracted folder and drag them into the Root Data Folder window.
+
+If Windows says the destination already contains a folder with that name, click **Yes** (or **Continue**). Windows merges the folders: it adds our files and deletes nothing of yours.
+
+Check the result by opening the folders:
+
+```
+Root Data Folder
 ├─ load
 │  └─ 0400486024DEC000
-│     └─ ButtonPrompts-KeyboardMouse        ← Step 3
+│     └─ ButtonPrompts-KeyboardMouse
 │        └─ romfs
 │           ├─ Font2\Scalable\External.Nin_Ounce_NVN2.bfotf.zs
 │           └─ UI\Layout2Archive\Common.Product.100.Nin_Ounce_NVN2.bntx.zs
 └─ config
    └─ input
-      └─ OoT-Keyboard-Mouse.ini             ← Step 4
+      └─ OoT-Keyboard-Mouse.ini
 ```
 
-If you do not have the "Open Mod Data Location" option, the same folders are inside the folder that holds `lichii.exe`: `user\load\0400486024DEC000` and `user\config\input`. Create any that are missing.
+Keep `ButtonPrompts-KeyboardMouse` as the **only** folder starting with `ButtonPrompts-` inside `0400486024DEC000` (move any PlayStation, Xbox or Steam Deck button-prompt mods out). Two of them replace the same game files and only one wins.
 
-## Step 5 – Load the keys in Lichii
+If your Lichii has no "Root Data Folder" entry: right-click the game in the game list → **Open Mod Data Location**, then go up two folders. That is the Root Data Folder.
 
-1. Open Lichii and click **Emulation → Configure → Controls**.
+## Step 4 – Load the keys in Lichii
+
+1. Click **Emulation → Configure → Controls**.
 2. Pick **Player 1** and make sure the type is **Pro Controller**.
 3. In the **Profile** box choose **OoT-Keyboard-Mouse**, click **Load**, then **OK**.
 
 This replaces your current Player 1 layout. To keep a gamepad layout, click **New** in the Profile box and save it under a name before loading the keyboard profile.
 
-## Step 6 – Play (repeat this every time you open the game)
+If `OoT-Keyboard-Mouse` is not in the Profile list, the `.ini` is not in `config\input`. Check Step 3, then close and reopen Lichii.
+
+## Step 5 – Play (repeat this every time you open the game)
 
 1. Start the game and wait until you can move the green hat kid. The first launch builds shaders and can take several minutes.
 2. **Click once on the game window.**
@@ -68,7 +74,7 @@ This replaces your current Player 1 layout. To keep a gamepad layout, click **Ne
 
 Why: Lichii forgets "mouse panning" every time it closes, so it must be switched on each launch. Ctrl+F9 works like a switch, so press it only once. If the cursor came back, press it again. The key only works when the emulator window is the one in front, which is why you click it first.
 
-A Lichii compiled with the [patches](../lichii-patches/README.md) does Step 6 by itself. Official and prebuilt builds do not have them.
+A Lichii compiled with the [patches](../lichii-patches/README.md) does Step 5 by itself. Official and prebuilt builds do not have them.
 
 ## Check that it works
 
@@ -85,7 +91,7 @@ The icons in the game are pictures of the default keys and do not follow your ch
 
 ## Uninstall
 
-Delete the `ButtonPrompts-KeyboardMouse` folder from `load\0400486024DEC000`, restore your gamepad layout in **Emulation → Configure → Controls**, and restart the game.
+Delete the `ButtonPrompts-KeyboardMouse` folder from `load\0400486024DEC000` and the `.ini` from `config\input`, restore your gamepad layout in **Emulation → Configure → Controls**, and restart the game.
 
 ## Cautions
 
