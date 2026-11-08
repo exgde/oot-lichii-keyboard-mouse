@@ -35,14 +35,64 @@ Ctrl and Alt are not used on purpose: in Lichii, Ctrl+Q quits the emulator and A
 
 ## Quick install
 
-`<Lichii>` is the folder that holds `lichii.exe` (it has a `user` folder next to it). Close the emulator first.
+Close Lichii first. There are 6 short steps.
 
-1. **Icons.** Download `OoT-ButtonPrompts-KeyboardMouse.zip` from [Releases](../../releases), extract it, and copy the whole `ButtonPrompts-KeyboardMouse` folder into `<Lichii>\user\load\0400486024DEC000\`. Keep it as the only `ButtonPrompts-*` folder there.
-2. **Keys.** Copy `profile/OoT-Keyboard-Mouse.ini` from this repository into `<Lichii>\user\config\input\`. In Lichii open **Emulation → Configure → Controls → Player 1**, choose the profile `OoT-Keyboard-Mouse` in the Profile box, click **Load**, then **OK**.
-3. **Cursor.** In **Emulation → Configure → General → UI** keep **Hide mouse on inactivity** ticked.
-4. **Every time you play:** start the game, wait until you are in it, **click the game window**, and press **Ctrl+F9 once**. The mouse now turns the camera and the cursor hides after a few seconds. (Ctrl+F9 toggles: press it again if the cursor came back.)
+**Step 1 – Download two files**
 
-The exact folder tree, how to find the data folder and the in-game checks are in [docs/INSTALLATION.md](docs/INSTALLATION.md).
+- The mod: open the [latest release](../../releases/latest), scroll down to **Assets** and click `OoT-ButtonPrompts-KeyboardMouse.zip`.
+- The keys file: [OoT-Keyboard-Mouse.ini](https://github.com/exgde/oot-lichii-keyboard-mouse/raw/main/profile/OoT-Keyboard-Mouse.ini). Right-click the link → **Save link as…**
+
+**Step 2 – Open the game's mod folder**
+
+Open Lichii, right-click the game (OOT) in the game list and click **Open Mod Data Location**. A Windows folder opens (its name ends in `0400486024DEC000`). Leave it open.
+
+**Step 3 – Add the icons**
+
+1. Right-click the zip you downloaded → **Extract All**.
+2. Open the extracted folder and drag the folder **`ButtonPrompts-KeyboardMouse`** into the folder from Step 2.
+3. Check: inside `0400486024DEC000` there is now `ButtonPrompts-KeyboardMouse`, and inside it a folder called `romfs`. If other folders there start with `ButtonPrompts-`, move them out.
+
+**Step 4 – Add the keys file**
+
+1. Go up two folders, to the one that contains `load` (in the address bar at the top, click the name just before `load`; it is usually `user`).
+2. Open `config`, then `input`. If `input` does not exist, create it (right-click → **New** → **Folder**, name it `input`).
+3. Put `OoT-Keyboard-Mouse.ini` there.
+
+When you are done the folders look like this:
+
+```
+user
+├─ load
+│  └─ 0400486024DEC000
+│     └─ ButtonPrompts-KeyboardMouse     ← Step 3
+└─ config
+   └─ input
+      └─ OoT-Keyboard-Mouse.ini          ← Step 4
+```
+
+**Step 5 – Load the keys in Lichii**
+
+1. Open Lichii and click **Emulation → Configure → Controls**.
+2. Pick **Player 1** and make sure the type is **Pro Controller**.
+3. In the **Profile** box choose **OoT-Keyboard-Mouse**, click **Load**, then **OK**.
+
+This replaces your current Player 1 layout. To keep a gamepad layout, click **New** in the Profile box and save it under a name before loading.
+
+**Step 6 – Play (repeat this every time you open the game)**
+
+1. Start the game and wait until you can move the green hat kid.
+2. **Click once on the game window.**
+3. Press **Ctrl + F9** one time.
+4. Move the mouse: the camera turns and the cursor disappears after a few seconds.
+
+Ctrl+F9 works like a switch, so press it only once. If the cursor came back, press it again.
+
+**Not working?**
+
+- Cursor still visible: click the game window, press Ctrl+F9 once, and check that **Emulation → Configure → General → UI → Hide mouse on inactivity** is ticked.
+- Icons still look like the Switch: check the folders against the picture above, then close and reopen the game.
+
+More help: [docs/INSTALLATION.md](docs/INSTALLATION.md) and [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Change keys, sensitivity and acceleration
 

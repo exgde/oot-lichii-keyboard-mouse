@@ -1,78 +1,87 @@
 # Installation
 
-Step-by-step guide. It takes about five minutes. You need:
+Six short steps, about five minutes. Close Lichii before you start.
 
-- **Lichii** (or a Lichii fork such as Fritchii) for Windows, closed while you copy files.
-- *OOT* for Switch 2, version 2.0.0 (`[0400486024dec000][v131072].nup`), already working in the emulator.
-- `OoT-ButtonPrompts-KeyboardMouse.zip` from [Releases](../../releases) (or your own build, see [BUILD-THE-MOD.md](BUILD-THE-MOD.md)).
+**You need:**
+
+- Lichii (or a fork such as Fritchii) for Windows, with *OOT* for Switch 2 already running in it (version 2.0.0, `[0400486024dec000][v131072].nup`).
+- Two files, downloaded in Step 1.
 
 Tested on Fritchii v4 and on a locally built Lichii "build 116".
 
-## 0. Find your Lichii data folder
+## Step 1 – Download two files
 
-Below, `<Lichii>` means the folder that holds `lichii.exe`.
+- **The mod:** open the [latest release](../../releases/latest), scroll down to **Assets** and click `OoT-ButtonPrompts-KeyboardMouse.zip`.
+- **The keys file:** [OoT-Keyboard-Mouse.ini](https://github.com/exgde/oot-lichii-keyboard-mouse/raw/main/profile/OoT-Keyboard-Mouse.ini). Right-click the link → **Save link as…**
 
-- If there is a **`user`** folder next to `lichii.exe`, that is where everything goes (`<Lichii>\user\...`). This is portable mode and the usual case.
-- If not, use the emulator itself: **right-click the game → Open Mod Data Location**. That opens `...\load\0400486024DEC000`, the folder used in step 1. The config folder is two levels up, then `config`.
+(Prefer to build the icons yourself, for example after changing keys? See [BUILD-THE-MOD.md](BUILD-THE-MOD.md).)
 
-## 1. Install the icon mod
+## Step 2 – Open the game's mod folder
 
-1. Extract the zip. Inside is a folder named **`ButtonPrompts-KeyboardMouse`**.
-2. Copy that whole folder into:
+Open Lichii, right-click the game (OOT) in the game list and click **Open Mod Data Location**. A Windows folder opens. Its name ends in `0400486024DEC000`. Leave it open.
 
-   ```
-   <Lichii>\user\load\0400486024DEC000\
-   ```
+## Step 3 – Add the icons
 
-3. Check the result. The tree must look exactly like this (two folders inside `romfs`, not more, not fewer levels):
+1. Right-click the zip you downloaded → **Extract All**.
+2. Open the extracted folder and drag the folder **`ButtonPrompts-KeyboardMouse`** into the folder from Step 2.
+3. Check: inside `0400486024DEC000` there is now `ButtonPrompts-KeyboardMouse`, and inside it a folder called `romfs`.
 
-   ```
-   <Lichii>\user\load\0400486024DEC000\
-   └── ButtonPrompts-KeyboardMouse\
-       └── romfs\
-           ├── Font2\Scalable\External.Nin_Ounce_NVN2.bfotf.zs
-           └── UI\Layout2Archive\Common.Product.100.Nin_Ounce_NVN2.bntx.zs
-   ```
+If other folders in `0400486024DEC000` start with `ButtonPrompts-` (PlayStation, Xbox, Steam Deck…), move them out. Two of them replace the same game files and only one wins.
 
-4. **Keep only one `ButtonPrompts-*` folder** in `0400486024DEC000` (move any PlayStation, Xbox or Steam Deck button-prompt mods somewhere else). Two of them replace the same game files and only one wins.
+## Step 4 – Add the keys file
 
-## 2. Install the input profile
+1. Go up two folders, to the one that contains `load`. In the address bar at the top, click the name just before `load` (it is usually `user`).
+2. Open `config`, then `input`. If `input` does not exist, create it: right-click → **New** → **Folder**, and name it `input`.
+3. Put `OoT-Keyboard-Mouse.ini` there.
 
-1. Copy `profile\OoT-Keyboard-Mouse.ini` (from this repository) into `<Lichii>\user\config\input\`. Create the `input` folder if it does not exist.
-2. Open Lichii, then **Emulation → Configure → Controls → Player 1**.
-3. Make sure the controller type is **Pro Controller**.
-4. In the **Profile** box choose `OoT-Keyboard-Mouse` and click **Load**, then **OK**.
+When you are done the folders look like this:
 
-This overwrites your Player 1 layout. If you use a gamepad, first save its layout as a profile (**New**) or keep a copy of `user\config\qt-config.ini`.
+```
+user
+├─ load
+│  └─ 0400486024DEC000
+│     └─ ButtonPrompts-KeyboardMouse        ← Step 3
+│        └─ romfs
+│           ├─ Font2\Scalable\External.Nin_Ounce_NVN2.bfotf.zs
+│           └─ UI\Layout2Archive\Common.Product.100.Nin_Ounce_NVN2.bntx.zs
+└─ config
+   └─ input
+      └─ OoT-Keyboard-Mouse.ini             ← Step 4
+```
 
-## 3. Check the cursor setting
+If you do not have the "Open Mod Data Location" option, the same folders are inside the folder that holds `lichii.exe`: `user\load\0400486024DEC000` and `user\config\input`. Create any that are missing.
 
-**Emulation → Configure → General → UI**: tick **Hide mouse on inactivity** (it is on by default). Click **OK**.
+## Step 5 – Load the keys in Lichii
 
-## 4. Start the game and turn on mouse panning (every launch)
+1. Open Lichii and click **Emulation → Configure → Controls**.
+2. Pick **Player 1** and make sure the type is **Pro Controller**.
+3. In the **Profile** box choose **OoT-Keyboard-Mouse**, click **Load**, then **OK**.
 
-The mouse only turns the camera while **mouse panning** is on, and Lichii does not remember it: it is off every time the emulator starts. So, each time:
+This replaces your current Player 1 layout. To keep a gamepad layout, click **New** in the Profile box and save it under a name before loading the keyboard profile.
 
-1. Start the game and wait until you are in the game (the first launch builds shaders and can take several minutes).
-2. **Click on the game window** so the emulator is the window in front.
-3. Press **Ctrl+F9** once.
+## Step 6 – Play (repeat this every time you open the game)
 
-Now moving the mouse turns the camera, and after a few seconds without moving it the cursor disappears.
+1. Start the game and wait until you can move the green hat kid. The first launch builds shaders and can take several minutes.
+2. **Click once on the game window.**
+3. Press **Ctrl + F9** one time.
+4. Move the mouse: the camera turns and the cursor disappears after a few seconds.
 
-- Ctrl+F9 **toggles**. Pressing it a second time turns panning off and the cursor comes back. If that happens, press it again.
-- Ctrl+F9 only works when the emulator window is in front. If another window has focus the key goes to that window instead.
-- A Lichii compiled with the [patches](../lichii-patches/README.md) does steps 2–3 by itself (panning on, cursor hidden). Official and prebuilt builds do not have them.
+Why: Lichii forgets "mouse panning" every time it closes, so it must be switched on each launch. Ctrl+F9 works like a switch, so press it only once. If the cursor came back, press it again. The key only works when the emulator window is the one in front, which is why you click it first.
 
-## 5. Check that it works
+A Lichii compiled with the [patches](../lichii-patches/README.md) does Step 6 by itself. Official and prebuilt builds do not have them.
 
-In game:
+## Check that it works
 
 - Moving the mouse turns the camera and no cursor is visible.
 - WASD moves the green hat kid, left click attacks, right click uses the item.
 - The action button shows a key (Space) and the attack button shows a mouse with the left button filled.
 - **Enter → Basic Controls** shows a keyboard and a mouse with guide lines to each key.
 
-If you see Switch or PlayStation buttons instead, the icon mod is not loaded: see [TROUBLESHOOTING.md](TROUBLESHOOTING.md). The log (`user\log\eden_log.txt`) of some builds prints `LayeredFS layer 'ButtonPrompts-KeyboardMouse'`; others only print `LayeredFS patches applied successfully`, so the in-game check above is the one to trust.
+If you still see Switch or PlayStation buttons, the icon folder is not where Lichii looks: see [TROUBLESHOOTING.md](TROUBLESHOOTING.md). The log (`user\log\eden_log.txt`) of some builds prints `LayeredFS layer 'ButtonPrompts-KeyboardMouse'`; others only print `LayeredFS patches applied successfully`, so the in-game check above is the one to trust.
+
+## If you change keys later
+
+The icons in the game are pictures of the default keys and do not follow your changes. If you rebind a key in Lichii, the new key works but the game still shows the old one. To make the icons match, rebuild the mod: [CONFIGURATION.md](CONFIGURATION.md#after-changing-keys-update-the-icons).
 
 ## Uninstall
 
