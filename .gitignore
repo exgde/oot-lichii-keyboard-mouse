@@ -1,0 +1,17 @@
+# files extracted from the game and generator output: never go into git
+tools/work/
+tools/assets/
+output/
+out/
+*.nup
+*.xci
+*.nsp
+*.zs
+*.bntx
+*.bfotf
+*.otf
+*.zip
+__pycache__/
+*.pyc
+.venv/
+venv/

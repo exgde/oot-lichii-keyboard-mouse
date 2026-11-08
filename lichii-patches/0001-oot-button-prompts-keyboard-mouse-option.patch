@@ -1,0 +1,48 @@
+diff --git a/src/common/settings_enums.h b/src/common/settings_enums.h
+index a3b3aac6b8..4f32f3232e 100644
+--- a/src/common/settings_enums.h
++++ b/src/common/settings_enums.h
+@@ -152,7 +152,7 @@ ENUM(AntiAliasing, None, Fxaa, Smaa);
+ ENUM(OotAntiAliasing, Game, NoSharpening);
+ ENUM(AspectRatio, R16_9, R4_3, R21_9, R16_10, Stretch);
+ ENUM(ConsoleMode, Handheld, Docked);
+-ENUM(OotButtonPrompts, Switch, PlayStation, Xbox, SteamDeck);
++ENUM(OotButtonPrompts, Switch, PlayStation, Xbox, SteamDeck, KeyboardMouse);
+ ENUM(AppletMode, HLE, LLE, Disabled);
+ ENUM(SpirvOptimizeMode, Never, OnLoad, Always);
+ ENUM(GpuClock, Normal, Boost, Overclock)
+diff --git a/src/core/file_sys/patch_manager.cpp b/src/core/file_sys/patch_manager.cpp
+index f93edeb319..48d4c7e321 100644
+--- a/src/core/file_sys/patch_manager.cpp
++++ b/src/core/file_sys/patch_manager.cpp
+@@ -705,6 +705,9 @@ static bool ButtonPromptModSelected(std::string_view mod_name) {
+     if (mod_name == "ButtonPrompts-SteamDeck") {
+         return selected == OotButtonPrompts::SteamDeck;
+     }
++    if (mod_name == "ButtonPrompts-KeyboardMouse") {
++        return selected == OotButtonPrompts::KeyboardMouse;
++    }
+     return true;
+ }
+ 
+diff --git a/src/qt_common/config/shared_translation.cpp b/src/qt_common/config/shared_translation.cpp
+index b5171f7dff..3e9be77218 100644
+--- a/src/qt_common/config/shared_translation.cpp
++++ b/src/qt_common/config/shared_translation.cpp
+@@ -324,6 +324,7 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QObject* parent) {
+            tr("Which controller's buttons the game shows in its prompts and HUD: Nintendo Switch "
+               "(A/B/X/Y, L/R, ZL/ZR), PlayStation (circle/cross/triangle/square, L1/R1, L2/R2) or "
+-              "Xbox (B/A/Y/X, LB/RB, LT/RT) or Steam Deck (B/A/Y/X, L1/R1, L2/R2). The controls "
++              "Xbox (B/A/Y/X, LB/RB, LT/RT), Steam Deck (B/A/Y/X, L1/R1, L2/R2) or keyboard and "
++              "mouse (Space/C/R/left click, Q/E, Shift/right click). The controls "
+               "screen shows the matching controller. Needs the ButtonPrompts mod folders; takes effect "
+               "after restarting the game."));
+     INSERT(Settings, mkw_30fps, tr("Mario Kart World: 30 FPS mode"),
+@@ -527,6 +528,7 @@ std::unique_ptr<ComboboxTranslationMap> ComboboxEnumeration(QObject* parent) {
+                               PAIR(OotButtonPrompts, PlayStation, tr("PlayStation")),
+                               PAIR(OotButtonPrompts, Xbox, tr("Xbox")),
+                               PAIR(OotButtonPrompts, SteamDeck, tr("Steam Deck")),
++                              PAIR(OotButtonPrompts, KeyboardMouse, tr("Keyboard and mouse")),
+                           }});
+     translations->insert({Settings::EnumMetadata<Settings::NvdecEmulation>::Index(),
+                           {

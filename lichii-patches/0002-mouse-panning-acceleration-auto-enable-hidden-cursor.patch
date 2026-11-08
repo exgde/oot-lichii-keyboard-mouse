@@ -1,0 +1,237 @@
+diff --git a/src/common/settings.h b/src/common/settings.h
+index cb661fa18a..fcd2b1bb91 100644
+--- a/src/common/settings.h
++++ b/src/common/settings.h
+@@ -1011,6 +1011,11 @@ struct Values {
+     // Kept last so the layout of the members above is unchanged (Ninja misses header deps here).
+     SwitchableSetting<OotButtonPrompts> oot_button_prompts{
+         linkage, OotButtonPrompts::Switch, "oot_button_prompts", Category::RendererAdvanced};
++
++    // Mouse panning acceleration: how much faster the camera turns when the pointer moves fast
++    // (0 = off, 100 = up to 4x). Also last for the same reason as above.
++    Setting<u8, true> mouse_panning_acceleration{
++        linkage, 40, 0, 100, "mouse_panning_acceleration", Category::Controls};
+ };
+ 
+ extern Values values;
+diff --git a/src/input_common/drivers/mouse.cpp b/src/input_common/drivers/mouse.cpp
+index 4ac259d03b..5aba8baa1d 100644
+--- a/src/input_common/drivers/mouse.cpp
++++ b/src/input_common/drivers/mouse.cpp
+@@ -4,6 +4,7 @@
+ // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include <algorithm>
+ #include <chrono>
+ #include <fmt/ranges.h>
+ #include <math.h>
+@@ -21,6 +22,14 @@ constexpr float default_motion_panning_sensitivity = 2.5f;
+ constexpr float default_motion_sensitivity = 0.416f;
+ constexpr float maximum_rotation_speed = 2.0f;
+ constexpr float maximum_stick_range = 1.5f;
++// Mouse panning acceleration. Pointer speed is measured in pixels per millisecond (1 px/ms is a
++// slow 1000 px/s sweep). Below the threshold the camera follows the pointer 1:1; the gain then
++// rises smoothly to its maximum at the full speed. The setting scales the extra gain (0..100%).
++constexpr float acceleration_threshold = 0.8f;
++constexpr float acceleration_full_speed = 8.0f;
++constexpr float acceleration_max_extra_gain = 3.0f;
++constexpr float acceleration_smoothing = 0.3f;
++constexpr float acceleration_idle_ms = 80.0f;
+ constexpr int mouse_axis_x = 0;
+ constexpr int mouse_axis_y = 1;
+ constexpr int wheel_axis_x = 2;
+@@ -128,6 +137,27 @@ void Mouse::UpdateMotionInput(Common::SteadyClock::time_point timestamp) {
+     });
+ }
+ 
++float Mouse::AccelerationGain(float pixels, Common::SteadyClock::time_point now) {
++    if (pixels <= 0.0f) {
++        return 1.0f; // the recentering move that follows every real move: no time passes for speed
++    }
++    const float elapsed_ms = std::chrono::duration<float, std::milli>(now - last_move_time).count();
++    last_move_time = now;
++    if (elapsed_ms > acceleration_idle_ms) {
++        move_speed = 0.0f; // a new movement starts from rest
++    }
++    const float dt_ms = std::clamp(elapsed_ms, 1.0f, 50.0f);
++    move_speed += (pixels / dt_ms - move_speed) * acceleration_smoothing;
++    const float strength = Settings::values.mouse_panning_acceleration.GetValue() / 100.0f;
++    if (strength <= 0.0f) {
++        return 1.0f;
++    }
++    const float t = std::clamp((move_speed - acceleration_threshold) /
++                                   (acceleration_full_speed - acceleration_threshold),
++                               0.0f, 1.0f);
++    return 1.0f + strength * acceleration_max_extra_gain * (t * t * (3.0f - 2.0f * t));
++}
++
+ void Mouse::Move(int x, int y, int center_x, int center_y) {
+     if (IsMousePanningEnabled()) {
+         auto const mouse_change_int = Common::Vec<int, 2>(x, y) - Common::Vec<int, 2>(center_x, center_y);
+@@ -135,9 +165,10 @@ void Mouse::Move(int x, int y, int center_x, int center_y) {
+         auto const x_sensitivity = Settings::values.mouse_panning_x_sensitivity.GetValue() * default_panning_sensitivity;
+         auto const y_sensitivity = Settings::values.mouse_panning_y_sensitivity.GetValue() * default_panning_sensitivity;
+         auto const deadzone_cw = Settings::values.mouse_panning_deadzone_counterweight.GetValue() * default_deadzone_counterweight;
++        auto const gain = AccelerationGain(mouse_change.Length(), Common::SteadyClock::Now());
+         last_motion_change += {-mouse_change[1] * x_sensitivity, -mouse_change[0] * y_sensitivity, 0};
+-        last_mouse_change[0] += mouse_change[0] * x_sensitivity;
+-        last_mouse_change[1] += mouse_change[1] * y_sensitivity;
++        last_mouse_change[0] += mouse_change[0] * x_sensitivity * gain;
++        last_mouse_change[1] += mouse_change[1] * y_sensitivity * gain;
+         // Bind the mouse change to [0 <= deadzone_cw <= 1.0]
+         const float length = last_mouse_change.Length();
+         if (length < deadzone_cw && length != 0.0f) {
+diff --git a/src/input_common/drivers/mouse.h b/src/input_common/drivers/mouse.h
+index 1f7cb7e966..f199666913 100644
+--- a/src/input_common/drivers/mouse.h
++++ b/src/input_common/drivers/mouse.h
+@@ -106,6 +106,8 @@ private:
+     void UpdateStickInput(Common::SteadyClock::time_point timestamp);
+     void UpdateMotionInput(Common::SteadyClock::time_point timestamp);
+     bool IsMousePanningEnabled();
++    /// Camera gain (>= 1) for a pointer movement of `pixels` just now: grows with the pointer speed
++    float AccelerationGain(float pixels, Common::SteadyClock::time_point now);
+ 
+     Common::Input::ButtonNames GetUIButtonName(const Common::ParamPackage& params) const;
+ 
+@@ -115,6 +117,8 @@ private:
+     Common::Vec<float, 3> last_motion_change;
+     Common::Vec<int, 2> wheel_position;
+     Common::SteadyClock::time_point last_notify_timestamp{};
++    Common::SteadyClock::time_point last_move_time{};
++    float move_speed = 0.0f; // smoothed pointer speed in pixels per millisecond
+     bool button_pressed = false;
+ };
+ 
+diff --git a/src/yuzu/configuration/configure_mouse_panning.cpp b/src/yuzu/configuration/configure_mouse_panning.cpp
+index e37c546b0c..bc00364be3 100644
+--- a/src/yuzu/configuration/configure_mouse_panning.cpp
++++ b/src/yuzu/configuration/configure_mouse_panning.cpp
+@@ -32,6 +32,7 @@ void ConfigureMousePanning::SetConfiguration(float right_stick_deadzone, float r
+         Settings::values.mouse_panning_deadzone_counterweight.GetValue());
+     ui->decay_strength->setValue(Settings::values.mouse_panning_decay_strength.GetValue());
+     ui->min_decay->setValue(Settings::values.mouse_panning_min_decay.GetValue());
++    ui->acceleration->setValue(Settings::values.mouse_panning_acceleration.GetValue());
+ 
+     if (right_stick_deadzone > 0.0f || right_stick_range != 1.0f) {
+         const QString right_stick_deadzone_str =
+@@ -58,6 +59,7 @@ void ConfigureMousePanning::SetDefaultConfiguration() {
+         Settings::values.mouse_panning_deadzone_counterweight.GetDefault());
+     ui->decay_strength->setValue(Settings::values.mouse_panning_decay_strength.GetDefault());
+     ui->min_decay->setValue(Settings::values.mouse_panning_min_decay.GetDefault());
++    ui->acceleration->setValue(Settings::values.mouse_panning_acceleration.GetDefault());
+ }
+ 
+ void ConfigureMousePanning::ConnectEvents() {
+@@ -76,6 +78,7 @@ void ConfigureMousePanning::ApplyConfiguration() {
+         static_cast<float>(ui->deadzone_counterweight->value());
+     Settings::values.mouse_panning_decay_strength = static_cast<float>(ui->decay_strength->value());
+     Settings::values.mouse_panning_min_decay = static_cast<float>(ui->min_decay->value());
++    Settings::values.mouse_panning_acceleration = static_cast<float>(ui->acceleration->value());
+ 
+     if (Settings::values.mouse_enabled && Settings::values.mouse_panning) {
+         Settings::values.mouse_panning = false;
+diff --git a/src/yuzu/configuration/configure_mouse_panning.ui b/src/yuzu/configuration/configure_mouse_panning.ui
+index 84fb7ee809..71f95da114 100644
+--- a/src/yuzu/configuration/configure_mouse_panning.ui
++++ b/src/yuzu/configuration/configure_mouse_panning.ui
+@@ -178,6 +178,44 @@
+        </layout>
+       </widget>
+      </item>
++     <item>
++      <widget class="QGroupBox" name="acceleration_box">
++       <property name="title">
++        <string>Acceleration</string>
++       </property>
++       <layout class="QGridLayout">
++        <item row="0" column="0">
++         <widget class="QLabel" name="acceleration_label">
++          <property name="text">
++           <string>Strength</string>
++          </property>
++         </widget>
++        </item>
++        <item row="0" column="1">
++         <widget class="QSpinBox" name="acceleration">
++          <property name="toolTip">
++           <string>Turns the camera faster when the mouse moves fast. 0% = off.</string>
++          </property>
++          <property name="alignment">
++           <set>Qt::AlignCenter</set>
++          </property>
++          <property name="suffix">
++           <string>%</string>
++          </property>
++          <property name="minimum">
++           <number>0</number>
++          </property>
++          <property name="maximum">
++           <number>100</number>
++          </property>
++          <property name="value">
++           <number>40</number>
++          </property>
++         </widget>
++        </item>
++       </layout>
++      </widget>
++     </item>
+     </layout>
+    </item>
+    <item>
+diff --git a/src/yuzu/main_window.cpp b/src/yuzu/main_window.cpp
+index 1ae0a812e5..9c5ba043e3 100644
+--- a/src/yuzu/main_window.cpp
++++ b/src/yuzu/main_window.cpp
+@@ -12,6 +12,7 @@
+ #include <boost/algorithm/string/split.hpp>
+ #include "common/fs/path_util.h"
+ #include "common/game_presets.h"
++#include "common/param_package.h"
+ #include "common/settings.h"
+ #include "common/settings_enums.h"
+ #include "frontend_common/settings_generator.h"
+@@ -1397,6 +1398,9 @@ void MainWindow::InitializeHotkeys() {
+         if (Settings::values.mouse_panning) {
+             render_window->installEventFilter(render_window);
+             render_window->setAttribute(Qt::WA_Hover, true);
++            render_window->setCursor(QCursor(Qt::BlankCursor));
++        } else {
++            render_window->unsetCursor();
+         }
+     });
+ }
+@@ -2285,10 +2289,21 @@ void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletPa
+     refresh_button->setDisabled(true);
+     SetFPSSuffix();
+ 
++    // Right stick bound to the mouse (keyboard + mouse profile): mouse panning is what the player
++    // wants, so switch it on for every boot (Ctrl+F9 still toggles it) and hide the pointer.
++    if (!Settings::values.mouse_enabled &&
++        Common::ParamPackage(Settings::values.players.GetValue()[0].analogs[Settings::NativeAnalog::RStick])
++                .Get("engine", "") == "mouse") {
++        Settings::values.mouse_panning = true;
++    }
++
+     if (UISettings::values.hide_mouse || Settings::values.mouse_panning) {
+         render_window->installEventFilter(render_window);
+         render_window->setAttribute(Qt::WA_Hover, true);
+     }
++    if (Settings::values.mouse_panning) {
++        render_window->setCursor(QCursor(Qt::BlankCursor));
++    }
+ 
+     if (UISettings::values.hide_mouse) {
+         mouse_hide_timer.start();
+@@ -3860,6 +3875,9 @@ void MainWindow::OnConfigure() {
+     if ((UISettings::values.hide_mouse || Settings::values.mouse_panning) && emulation_running) {
+         render_window->installEventFilter(render_window);
+         render_window->setAttribute(Qt::WA_Hover, true);
++        if (Settings::values.mouse_panning) {
++            render_window->setCursor(QCursor(Qt::BlankCursor));
++        }
+     } else {
+         render_window->removeEventFilter(render_window);
+         render_window->setAttribute(Qt::WA_Hover, false);

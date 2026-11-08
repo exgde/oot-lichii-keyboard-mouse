@@ -1,0 +1,6 @@
+numpy
+Pillow>=10.1
+fonttools
+zstandard
+texture2ddecoder
+astc-encoder-py
