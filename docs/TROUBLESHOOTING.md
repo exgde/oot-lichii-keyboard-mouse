@@ -20,11 +20,13 @@
 
 **I changed a key and the game still shows the old picture.** Expected: the pictures are fixed images of the default keys. See [CONFIGURATION.md](CONFIGURATION.md#after-changing-keys-update-the-icons).
 
-**I want my gamepad back.** Close Lichii and copy `config\qt-config.ini.pre-keyboard-mouse` over `config\qt-config.ini` (the script made that copy the first time you applied). Or load a gamepad profile in Configure → Controls. For the icons, remove the `ButtonPrompts-KeyboardMouse` folder from `load`.
+**I want my gamepad back.** In the settings program click **Undo mod changes...** (Lichii closed): your old Player 1 and mouse settings come back and the mod is removed. Without the program: close Lichii, open the `config` folder in Lichii's data folder, rename `qt-config.ini` (Windows may show it as `qt-config`) to `qt-config-with-mod.ini`, then rename `qt-config.ini.pre-keyboard-mouse` to `qt-config.ini`. Do not delete `qt-config.ini.pre-keyboard-mouse`: it is your old settings, saved before the mod changed anything (the whole old file comes back, so Lichii settings changed since then go back too).
 
 ## In the game
 
 **Native camera: the camera does not turn.** Check that `OoT-MouseCapture.exe` is open (it says "Game found"), click the game picture and press Ctrl+F9 once. `Apply-Settings.bat` must have printed `game patch : ON`; if it says the patch is missing, run `INSTALL.bat` again.
+
+**Native camera: the camera stops or stutters, as if the mouse hit an invisible wall.** Use version 1.4.2 or newer of `OoT-MouseCapture.exe` (install again). Older helpers let go of the pointer when a fast move (or a busy PC) carried it out of the game picture, mostly with Lichii in a window, and the camera then stayed stuck at the edge until the mouse came back. Keep the helper's window open while you play: once you click the picture it must say *Active: the mouse turns the camera*. If it never says *Game found*, the helper does not see the game window: tell us the emulator's name and window title.
 
 **Native camera: the pointer stays visible.** Press Ctrl+F9 once with the game in front (Lichii hides the pointer; `OoT-MouseCapture` never does).
 

@@ -7,6 +7,12 @@
 
 static volatile LONG stop_flag = 0;
 
+static void print_status(const wchar_t *msg) {
+    SYSTEMTIME t;
+    GetLocalTime(&t);
+    wprintf(L"[%02d:%02d:%02d] %ls\n", t.wHour, t.wMinute, t.wSecond, msg);
+}
+
 static BOOL WINAPI on_console(DWORD type) {
     (void)type;
     InterlockedExchange(&stop_flag, 1);
@@ -29,7 +35,16 @@ int main(void) {
     if (stop_flag) return 0;
     DWORD pid = 0;
     GetWindowThreadProcessId(f.top, &pid);
-    wprintf(L"Game found. The helper works while the game is in front.\n");
+    wchar_t title[256] = L"", exe[MAX_PATH] = L"?";
+    DWORD n = MAX_PATH;
+    HANDLE p = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (p) {
+        QueryFullProcessImageNameW(p, 0, exe, &n);
+        CloseHandle(p);
+    }
+    GetWindowTextW(f.top, title, 256);
+    wprintf(L"Game found: %ls\n  (%ls)\nThe helper works while the game is in front. Status:\n", title, exe);
+    mc_log = print_status;
     mc_run(pid, &stop_flag);
     wprintf(L"Game closed. Mouse settings are back to normal.\n");
     return 0;

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.2 – 2026-11-12
+
+- **Native camera: no more "invisible wall".** When a fast move or a busy PC carried the pointer out of the game picture before `OoT-MouseCapture.exe` caught it (mostly with Lichii in a window), the helper let go, Lichii held the game's mouse at the edge of the picture, and the camera stopped until the mouse came back. The helper now stays active until another window comes in front and brings an escaped pointer straight back; it also runs at a higher priority so the emulator cannot keep it waiting. In a simulation of a busy PC with a windowed game, the camera went from losing about 95 % of a fast turn to about 5 %.
+- The helper also finds the game in any Lichii fork (it recognizes the emulator's Qt window, whatever the exe is called), in the separate game window of *Single Window Mode* off, and with a Japanese game title; its window now prints what it is doing (*Game found*, *Active*, *Paused*).
+- **Settings program: new "Undo mod changes..." button.** It puts Lichii back the way it was before the mod: Player 1 and the mouse settings come back from the copy made before the mod's first change (only those lines: other Lichii settings changed since then stay), the mod's folders and files are removed, and button-icon mods the installers had moved to `mod-backups\` are put back. The settings file (your keys) and the old `qt-config.ini` copy are kept in `mod-backups\`.
+- Clearer manual instructions for getting the old controls back (rename the files instead of "copy over").
+
 ## v1.4.1 – 2026-11-12
 
 - **Native camera: no more small jerks or stops with other screen settings.** `OoT-MouseCapture.exe` now reads Lichii's *Aspect Ratio* setting (16:9, 4:3, 21:9, 16:10 or Stretch, including a per-game setting) and lays the picture out exactly like the emulator, and it works in real screen pixels, so Windows display scaling (125 %, 150 %) no longer breaks the exact clock-hand jumps. Before, anything other than 16:9 at 100 % scaling could make the camera jerk back a little at times or stop at the edge of the picture.

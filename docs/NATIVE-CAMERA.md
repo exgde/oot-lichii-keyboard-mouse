@@ -16,12 +16,14 @@ The game keeps its own limits: how far up and down you can look, and the slow re
 
 **2. A small game patch uses it** (`MouseCamera-Native`, an IPS file for main build `E0F3CCFAF50065AE…`). It replaces one instruction in the player camera update (module offset `0x625370`), right where the game has turned the right stick into this frame's turn in degrees, and adds the mouse movement read through `GetMouseStates`. The game then takes its normal "turned by hand" path, so everything else (pitch limits, collisions, auto-return) stays the game's own. The code lives in unused space after the game's code. `Apply-Settings` writes your speed into the patch (after the marker `OOTMCAM1`) and renames it to `.ips.off` when you go back to `stick`.
 
-**3. `OoT-MouseCapture.exe` keeps the pointer in the picture.** Lichii hands the game the pointer *position*, so on its own the camera would stop at the edge of the window. While the game is in front and the pointer is over the picture, the helper:
+**3. `OoT-MouseCapture.exe` keeps the pointer in the picture.** Lichii hands the game the pointer *position*, so on its own the camera would stop at the edge of the window. It starts once the game is in front and the pointer is over the picture, and keeps going until another window comes in front (Alt+Tab). Meanwhile the helper:
 
 - moves the pointer back by exactly 512 (left/right) or 384 (up/down) game pixels whenever it gets half of that from the middle, like a clock hand going from 12 to 1. The patch undoes any jump of exactly that size, so the camera never sees it, however fast the mouse moves;
+- brings the pointer straight back if a very fast move (or a busy PC) got it out of the picture before the helper saw it. Lichii holds the game's mouse at the edge of the picture while the pointer is outside, so letting it stay there would stop the camera as if against an invisible wall;
+- runs at the highest normal priority, so the emulator's busy threads cannot keep its 1 ms loop waiting;
 - turns off Windows *Enhance pointer precision* (mouse acceleration) and sets the pointer speed so that one mouse count is one pixel of the game's 1280×720 picture, which makes the camera follow the hand exactly at any window size.
 
-It never hides, clips or locks the pointer (Lichii hides it after Ctrl+F9), and it changes nothing permanently: the Windows settings come back as soon as the game loses focus or closes, and if it ever crashes, its next start puts them back.
+To use Lichii's menus with the mouse, Alt+Tab away and back (or close the helper). Its window shows what it is doing (*Game found*, *Active*, *Paused*). It never hides, clips or locks the pointer (Lichii hides it after Ctrl+F9), and it changes nothing permanently: the Windows settings come back as soon as the game loses focus or closes, and if it ever crashes, its next start puts them back.
 
 ## Building
 

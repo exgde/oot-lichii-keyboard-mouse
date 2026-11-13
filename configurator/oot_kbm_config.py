@@ -121,6 +121,16 @@ def emulator_running():
     return None
 
 
+def helper_running():
+    try:
+        out = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq OoT-MouseCapture.exe', '/FO', 'CSV', '/NH'],
+                             capture_output=True, text=True,
+                             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)).stdout
+    except Exception:
+        return False
+    return 'oot-mousecapture.exe' in out.lower()
+
+
 # ---------------------------------------------------------------- settings file (same format as the manual way)
 def read_settings(path):
     vals = dict(DEFAULTS)
@@ -243,6 +253,135 @@ def run_apply_settings(root, log):
         raise RuntimeError('Apply-Settings stopped:\n' + '\n'.join(l.strip() for l in text.splitlines() if 'ERROR' in l))
 
 
+# ---------------------------------------------------------------- undo: Lichii back to how it was before the mod
+# The qt-config.ini lines the mod changes (Apply-Settings.ps1): Player 1 and the mouse values. Everything else
+# (graphics, other players, games...) stays as it is now.
+MOD_QT_KEYS = {
+    'Controls': re.compile(r'^(player_0_\w+|mouse_enabled|mouse_panning_(x_sensitivity|y_sensitivity|'
+                           r'deadzone_counterweight|decay_strength|min_decay))(\\default)?='),
+    'UI': re.compile(r'^hideInactiveMouse(\\default)?='),
+}
+QT_BACKUP = '.pre-keyboard-mouse'          # Apply-Settings.ps1 copies qt-config.ini to this once, before its first change
+
+
+def _read_lines(path):
+    text = open(path, encoding='utf-8', newline='').read()
+    eol = '\r\n' if '\r\n' in text else '\n'
+    return text.replace('\r\n', '\n').split('\n'), eol
+
+
+def _section_range(lines, name):
+    start = None
+    for i, l in enumerate(lines):
+        s = l.strip()
+        if s.startswith('[') and s.endswith(']'):
+            if start is not None:
+                return start, i
+            if s[1:-1] == name:
+                start = i
+    return (start, len(lines)) if start is not None else None
+
+
+def restore_input_settings(qt_path, backup_path):
+    """Puts the mod's lines (MOD_QT_KEYS) of qt-config.ini back to their values in backup_path, in place: a line the
+    old file did not have is removed, one only the old file had is added. Returns how many lines changed."""
+    cur, eol = _read_lines(qt_path)
+    old, _ = _read_lines(backup_path)
+    changed = 0
+    for section, pat in MOD_QT_KEYS.items():
+        orng = _section_range(old, section)
+        old_lines = [l for l in old[orng[0] + 1:orng[1]] if pat.match(l)] if orng else []
+        old_by_key = {l.split('=', 1)[0]: l for l in old_lines}
+        crng = _section_range(cur, section)
+        if crng is None:
+            if old_lines:
+                cur += ['[%s]' % section] + old_lines + ['']
+                changed += len(old_lines)
+            continue
+        body, seen = [], set()
+        for l in cur[crng[0] + 1:crng[1]]:
+            if not pat.match(l):
+                body.append(l)
+                continue
+            key = l.split('=', 1)[0]
+            if key in old_by_key:
+                seen.add(key)
+                body.append(old_by_key[key])
+                changed += old_by_key[key] != l
+            else:
+                changed += 1                    # added by the mod
+        missing = [l for l in old_lines if l.split('=', 1)[0] not in seen]
+        at = len(body)
+        while at > 0 and body[at - 1].strip() == '':
+            at -= 1
+        body[at:at] = missing
+        changed += len(missing)
+        cur = cur[:crng[0] + 1] + body + cur[crng[1]:]
+    tmp = qt_path + '.tmp'
+    with open(tmp, 'w', encoding='utf-8', newline='') as f:
+        f.write(eol.join(cur))
+    os.replace(tmp, qt_path)
+    return changed
+
+
+def _move_unique(path, folder):
+    os.makedirs(folder, exist_ok=True)
+    base = os.path.basename(path)
+    dest, n = os.path.join(folder, base), 2
+    while os.path.exists(dest):
+        dest = os.path.join(folder, '%s-%d' % (base, n))
+        n += 1
+    shutil.move(path, dest)
+    return dest
+
+
+def undo_mod(root, log):
+    """Lichii as it was before the mod: Player 1 and mouse settings from the copy made before the first change,
+    the mod's files removed, other button-icon mods the installers moved to mod-backups put back. The settings file
+    (your keys) and the old qt-config.ini copy are kept in mod-backups. Returns False when there was no copy."""
+    load = os.path.join(root, 'load', TITLE)
+    backups = os.path.join(root, 'mod-backups')
+    qt = os.path.join(root, 'config', 'qt-config.ini')
+    restored = False
+    if os.path.isfile(qt + QT_BACKUP):
+        n = restore_input_settings(qt, qt + QT_BACKUP)
+        _move_unique(qt + QT_BACKUP, backups)
+        log('Controls: Player 1 and the mouse settings are back to what they were before the mod (%d lines).' % n)
+        restored = True
+    else:
+        log('Controls: no copy of your old settings was found (config\\qt-config.ini%s), so they were not changed.'
+            % QT_BACKUP)
+    for d in ('ButtonPrompts-KeyboardMouse', 'MouseCamera-Native'):
+        p = os.path.join(load, d)
+        if os.path.isdir(p):
+            shutil.rmtree(p)
+            log('Removed the mod folder load\\%s\\%s.' % (TITLE, d))
+    if os.path.isdir(backups):
+        for d in sorted(os.listdir(backups)):
+            src = os.path.join(backups, d)
+            if not (os.path.isdir(src) and d.startswith('ButtonPrompts-') and not d.startswith('ButtonPrompts-KeyboardMouse')):
+                continue
+            name = re.sub(r'-\d+$', '', d)
+            dst = os.path.join(load, name)
+            if os.path.exists(dst):
+                log('Left %s in mod-backups (load already has %s).' % (d, name))
+                continue
+            os.makedirs(load, exist_ok=True)
+            shutil.move(src, dst)
+            log('Put back the mod %s (it was in mod-backups).' % name)
+    for rel in (('config', 'input', 'OoT-Keyboard-Mouse.ini'), ('Apply-Settings.ps1',), ('Apply-Settings.bat',),
+                ('OoT-MouseCapture.exe',)):
+        p = os.path.join(root, *rel)
+        if os.path.isfile(p):
+            os.remove(p)
+    for f in (SETTINGS_NAME, 'OoT-Keyboard-Mouse-Settings.new.ini'):
+        p = os.path.join(root, f)
+        if os.path.isfile(p):
+            _move_unique(p, backups)
+    log('Removed the mod\'s files. Your settings file (your keys) is kept in the mod-backups folder.')
+    return restored
+
+
 # ---------------------------------------------------------------- the window
 class App:
     def __init__(self, tk_root):
@@ -286,6 +425,8 @@ class App:
         bar = ttk.Frame(self.tk)
         bar.pack(fill='x', **pad)
         ttk.Button(bar, text='Default settings', command=self.defaults).pack(side='left')
+        self.undo_btn = ttk.Button(bar, text='Undo mod changes...', command=self.undo)
+        self.undo_btn.pack(side='left', padx=(8, 0))
         self.apply_btn = ttk.Button(bar, text='Apply', command=self.apply)
         self.apply_btn.pack(side='right')
         self.log_box = tk.Text(self.tk, height=9, state='disabled', wrap='word', relief='flat', background='#f4f4f4')
@@ -553,6 +694,43 @@ class App:
         except Exception as e:
             self.q.put(('error', str(e)))
 
+    def undo(self):
+        root = normalise_folder(self.folder.get())
+        if not root:
+            messagebox.showerror(APP, 'Pick Lichii\'s data folder first (button "Change...").')
+            return
+        running = emulator_running()
+        if running:
+            messagebox.showwarning(APP, 'Close Lichii (%s) first.\n\nIt saves its settings when it closes, which would undo '
+                                        'these changes.' % running)
+            return
+        if helper_running():
+            messagebox.showwarning(APP, 'Close OoT-MouseCapture.exe first (the mouse helper window).')
+            return
+        if not messagebox.askyesno(APP, 'Put Lichii back the way it was before this mod?\n\n'
+                                        '- Player 1 controls and the mouse settings go back to your old ones\n'
+                                        '- the keyboard and mouse icons and the native camera patch are removed\n'
+                                        '- button-icon mods the mod had moved to mod-backups are put back\n\n'
+                                        'Your other Lichii settings are not touched. You can install the mod again '
+                                        'at any time with Apply.'):
+            return
+        self.apply_btn.state(['disabled'])
+        self.undo_btn.state(['disabled'])
+        self.log('---')
+        threading.Thread(target=self.undo_work, args=(root,), daemon=True).start()
+
+    def undo_work(self, root):
+        log = lambda s: self.q.put(('log', s))
+        try:
+            if undo_mod(root, log):
+                self.q.put(('done', 'Done. Lichii is back to how it was before the mod: start it and play with your '
+                                    'controller as before.'))
+            else:
+                self.q.put(('done', 'Done. The mod is removed, but there was no copy of your old controls. In Lichii, '
+                                    'open Emulation > Configure > Controls and set Player 1 to your controller.'))
+        except Exception as e:
+            self.q.put(('error', 'Undo stopped: %s' % e))
+
     def poll(self):
         try:
             while True:
@@ -560,6 +738,7 @@ class App:
                 self.log(text)
                 if kind in ('done', 'error'):
                     self.apply_btn.state(['!disabled'])
+                    self.undo_btn.state(['!disabled'])
                     (messagebox.showinfo if kind == 'done' else messagebox.showerror)(APP, text)
         except queue.Empty:
             pass
@@ -593,9 +772,24 @@ def selftest(folder, nup, logfile):
         log('SELFTEST FAILED: %r\n%s' % (e, traceback.format_exc()))
 
 
+def selftest_undo(folder, logfile):
+    """oot_kbm_config --selftest-undo <data folder> <log>: the Undo button, no window (for testing builds)."""
+    out = open(logfile, 'w', encoding='utf-8')
+    log = lambda s: (out.write(s + '\n'), out.flush())
+    try:
+        undo_mod(normalise_folder(folder), log)
+        log('SELFTEST UNDO OK')
+    except Exception as e:
+        import traceback
+        log('SELFTEST UNDO FAILED: %r\n%s' % (e, traceback.format_exc()))
+
+
 def main():
     if len(sys.argv) == 5 and sys.argv[1] == '--selftest':
         selftest(*sys.argv[2:5])
+        return
+    if len(sys.argv) == 4 and sys.argv[1] == '--selftest-undo':
+        selftest_undo(*sys.argv[2:4])
         return
     root = tk.Tk()
     try:

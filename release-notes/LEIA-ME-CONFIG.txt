@@ -43,4 +43,6 @@ BOM SABER
   - Outros mods de ícones (PlayStation, Xbox, Steam Deck) vão para a pasta "mod-backups",
     porque só um pode ficar ativo.
   - Suas configurações antigas do Lichii ficam em config\qt-config.ini.pre-keyboard-mouse.
+  - Para deixar o Lichii como era antes (controle, sem o mod): feche o Lichii,
+    abra o programa e clique em "Undo mod changes...".
   - A tela "Basic Controls" continua com o layout padrão; os ícones do HUD e dos menus seguem suas teclas.

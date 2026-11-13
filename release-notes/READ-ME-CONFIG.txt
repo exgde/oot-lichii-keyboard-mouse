@@ -43,4 +43,6 @@ GOOD TO KNOW
   - Other button-icon mods (PlayStation, Xbox, Steam Deck) are moved to the "mod-backups" folder,
     because only one can be active.
   - Your old Lichii settings are kept as config\qt-config.ini.pre-keyboard-mouse.
+  - To put Lichii back the way it was (gamepad, no mod): close Lichii, open
+    the program and click "Undo mod changes...".
   - The "Basic Controls" screen keeps the default key layout; the HUD and menu icons follow your keys.

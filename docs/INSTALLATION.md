@@ -4,8 +4,8 @@ There are two ways to install. **Pick one**; they install the same mod and use t
 
 | Way | Download | Best for |
 |---|---|---|
-| **A. The program** | `OoT-KeyboardMouse-Config-v1.4.1.zip` | Most people: choose keys with clicks; the in-game key icons follow your keys. |
-| **B. Manual** | `OoT-KeyboardMouse-v1.4.1.zip` | People who prefer no program: a one-click installer and a text file for the keys. |
+| **A. The program** | `OoT-KeyboardMouse-Config-v1.4.2.zip` | Most people: choose keys with clicks; the in-game key icons follow your keys. |
+| **B. Manual** | `OoT-KeyboardMouse-v1.4.2.zip` | People who prefer no program: a one-click installer and a text file for the keys. |
 
 Both are on the [latest release](../../releases/latest) page, under **Assets**.
 
@@ -15,7 +15,7 @@ Both are on the [latest release](../../releases/latest) page, under **Assets**.
 
 ## A. Install with the program
 
-1. **Download** `OoT-KeyboardMouse-Config-v1.4.1.zip`.
+1. **Download** `OoT-KeyboardMouse-Config-v1.4.2.zip`.
 2. **Extract it:** right-click the zip → **Extract All…** → **Extract**. A folder opens with `OoT-KeyboardMouse-Config.exe` in it.
 3. **Close Lichii** completely (stopping the game is not enough: Lichii saves its settings when it closes and would undo the changes).
 4. Double-click **`OoT-KeyboardMouse-Config.exe`**.
@@ -38,7 +38,7 @@ To change something later: close Lichii, open the program, change it, click **Ap
 
 ## B. Install manually
 
-1. **Download** `OoT-KeyboardMouse-v1.4.1.zip`.
+1. **Download** `OoT-KeyboardMouse-v1.4.2.zip`.
 2. **Extract it:** right-click the zip → **Extract All…** → **Extract**. A folder opens with `INSTALL.bat` in it.
    - Do not run anything from inside the zip window: extract first.
 3. **Close Lichii** completely.
@@ -93,7 +93,9 @@ If you still see Switch or PlayStation buttons, see [TROUBLESHOOTING.md](TROUBLE
 
 ## Uninstall
 
-Close Lichii. In Lichii's data folder delete `load\0400486024DEC000\ButtonPrompts-KeyboardMouse` and `load\0400486024DEC000\MouseCamera-Native`. To get your gamepad layout back, copy `config\qt-config.ini.pre-keyboard-mouse` over `config\qt-config.ini`. Any button-icon mod the installers moved is in `mod-backups\`.
+**With the program:** close Lichii, open `OoT-KeyboardMouse-Config.exe` and click **Undo mod changes...**. It puts Player 1 and the mouse settings back to what they were before the mod (from the copy made the first time the mod changed them), removes the mod's folders and files, and puts back any button-icon mod the installers had moved to `mod-backups\`. Your other Lichii settings are not touched, and your settings file (your keys) is kept in `mod-backups\` in case you install the mod again.
+
+**By hand:** close Lichii. In Lichii's data folder delete `load\0400486024DEC000\ButtonPrompts-KeyboardMouse` and `load\0400486024DEC000\MouseCamera-Native`. To get your old controls back, close Lichii, open the `config` folder in Lichii's data folder, rename `qt-config.ini` (Windows may show it as `qt-config`) to `qt-config-with-mod.ini`, then rename `qt-config.ini.pre-keyboard-mouse` to `qt-config.ini`. Do not delete `qt-config.ini.pre-keyboard-mouse`: it is your old settings, saved before the mod changed anything (the whole old file comes back, so Lichii settings changed since then go back too). Any button-icon mod the installers moved is in `mod-backups\`: move it back into `load\0400486024DEC000`.
 
 ## Cautions
 

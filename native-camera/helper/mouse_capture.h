@@ -2,7 +2,7 @@
 
    In native mode the game reads the real mouse (Lichii setting mouse_enabled=true). Lichii gives it the pointer
    position inside the picture, so on its own the camera would stop turning at the edge of the picture.
-   While the game window is in front (and the pointer is over the picture) this helper:
+   Once the game window is in front and the pointer is over the picture, and until the game loses focus, this helper:
      - keeps the pointer near the middle of the picture by moving it back by exactly 512 (or 384) game pixels
        when it gets half of that away. The game patch undoes jumps of exactly that size, so the camera never
        sees them, however fast the mouse moves;
@@ -10,8 +10,11 @@
        mouse count is one pixel of the game's 1280x720 picture: the camera then follows the hand 1:1, at any
        window size. Both are restored as soon as the game loses focus or closes, and are never written to the
        Windows settings (the next start also restores them if a crash interrupted it).
+   If a very fast move (or a busy PC) gets the pointer out of the picture before the helper sees it, the helper
+   brings it straight back instead of letting go: otherwise Lichii would hold the game's mouse at the edge of the
+   picture and the camera would stop as if against an invisible wall.
    It never hides, clips or locks the pointer: Lichii hides it itself once Ctrl+F9 is pressed in the game, and
-   Alt+Tab always gives it back. */
+   Alt+Tab (or any other window coming in front) always gives it back. */
 #pragma once
 #include <windows.h>
 #include <wchar.h>
@@ -27,7 +30,8 @@ typedef struct { DWORD pid; HWND top; } McFind;
 
 /* Is pid an emulator of the Lichii family (lichii, eden, yuzu and their forks)? */
 static BOOL mc_is_emulator(DWORD pid) {
-    static const wchar_t *names[] = {L"lichii", L"fritchii", L"eden", L"yuzu", L"citron", L"sudachi", L"suyu", L"torzu"};
+    static const wchar_t *names[] = {L"lichii", L"fritchii", L"eden", L"yuzu", L"citron", L"sudachi", L"suyu",
+                                     L"torzu", L"eglantine"};
     wchar_t path[MAX_PATH];
     DWORD n = MAX_PATH;
     BOOL ok = FALSE;
@@ -44,14 +48,26 @@ static BOOL mc_is_emulator(DWORD pid) {
     return ok;
 }
 
+/* The emulator shows the game's name in its window title ("Ocarina", or "オカリナ" in Japanese). */
+static BOOL mc_title_is_game(HWND h) {
+    wchar_t title[512];
+    return GetWindowTextW(h, title, 512) && (wcsstr(title, L"Ocarina") || wcsstr(title, L"\x30AA\x30AB\x30EA\x30CA"));
+}
+
+/* Every emulator of the family is a Qt program (window class "Qt5..."/"Qt6..."), whatever its exe is called;
+   a browser tab with the game's name is not (Chrome_WidgetWin_1, MozillaWindowClass...). */
+static BOOL mc_is_qt_window(HWND h) {
+    wchar_t cls[64];
+    return GetClassNameW(h, cls, 64) && wcsncmp(cls, L"Qt", 2) == 0;
+}
+
 static BOOL CALLBACK mc_find_top(HWND h, LPARAM lp) {
     McFind *f = (McFind *)lp;
     DWORD pid = 0;
-    wchar_t title[512];
     GetWindowThreadProcessId(h, &pid);
-    /* the game window: an emulator window whose title has the game's name (it contains "Ocarina") */
-    if ((f->pid == 0 || pid == f->pid) && IsWindowVisible(h) && GetWindowTextW(h, title, 512) &&
-        wcsstr(title, L"Ocarina") && (f->pid != 0 || mc_is_emulator(pid))) {
+    /* the game window: an emulator window whose title has the game's name */
+    if ((f->pid == 0 || pid == f->pid) && IsWindowVisible(h) && mc_title_is_game(h) &&
+        (f->pid != 0 || mc_is_qt_window(h) || mc_is_emulator(pid))) {
         f->top = h;
         return FALSE;
     }
@@ -230,10 +246,35 @@ static void mc_pointer_apply(LONG picture_width) {
 
 static volatile LONG mc_active = 0;
 static LONG mc_active_width = 0;
+static void (*mc_log)(const wchar_t *msg) = NULL;   /* status lines; the standalone exe prints them */
+
+static void mc_say(const wchar_t *msg) {
+    if (mc_log) mc_log(msg);
+}
 
 static void mc_release(void) {
     if (InterlockedExchange(&mc_active, 0)) mc_pointer_restore();
     mc_active_width = 0;
+}
+
+/* Clock hand: a pointer more than half a period (512 x 384 pixels of the game picture) from the middle of picture
+   r goes back by whole periods, so it ends within half a period of the middle, inside the picture. The game patch
+   undoes jumps of exactly one period (cave.c, WRAP_X / WRAP_Y), so the camera never sees them. A pointer that got
+   out of the picture comes back the same way. Returns TRUE when *p changed. */
+static BOOL mc_wrap(const RECT *r, POINT *p) {
+    LONG cx = (r->left + r->right) / 2, cy = (r->top + r->bottom) / 2;
+    LONG wrap_x = (LONG)((r->right - r->left) * MC_WRAP_X / 1280.0 + 0.5);
+    LONG wrap_y = (LONG)((r->bottom - r->top) * MC_WRAP_Y / 720.0 + 0.5);
+    LONG dx = p->x - cx, dy = p->y - cy;
+    if (wrap_x < 2 || wrap_y < 2) return FALSE;
+    while (dx > wrap_x / 2) dx -= wrap_x;
+    while (dx < -(wrap_x / 2)) dx += wrap_x;
+    while (dy > wrap_y / 2) dy -= wrap_y;
+    while (dy < -(wrap_y / 2)) dy += wrap_y;
+    if (cx + dx == p->x && cy + dy == p->y) return FALSE;
+    p->x = cx + dx;
+    p->y = cy + dy;
+    return TRUE;
 }
 
 /* Runs until process `pid` exits (pid 0: until `*stop` becomes non-zero). */
@@ -244,8 +285,14 @@ static void mc_run(DWORD pid, volatile LONG *stop) {
     mc_load_aspect();
     mc_pointer_recover();
     timeBeginPeriod(1);
+    /* The emulator keeps every CPU core busy. At normal priority Windows can leave this 1 ms loop asleep long
+       enough for a fast move to carry the pointer out of the picture; it only sleeps, so this costs nothing. */
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
     McFind f = {pid, NULL};
-    DWORD last_search = 0;
+    DWORD last_search = 0, rect_time = 0, escapes = 0;
+    HWND rect_of = NULL;
+    RECT r = {0};
+    BOOL have_rect = FALSE;
     for (;;) {
         if (proc && WaitForSingleObject(proc, 0) == WAIT_OBJECT_0) break;
         if (stop && *stop) break;
@@ -258,31 +305,46 @@ static void mc_run(DWORD pid, volatile LONG *stop) {
                 if (f.top) mc_load_aspect();               /* the game (re)started: read Aspect Ratio again */
             }
         }
-        RECT r = {0};
+        /* The game is in front: a window of the emulator with the game's name (the main window, or the separate
+           game window when Lichii's "Single Window Mode" is off), or something inside it. */
+        HWND fg = GetForegroundWindow(), root = fg ? GetAncestor(fg, GA_ROOT) : NULL;
+        DWORD fg_pid = 0, game_pid = pid;
+        if (root) GetWindowThreadProcessId(root, &fg_pid);
+        if (!game_pid && f.top) GetWindowThreadProcessId(f.top, &game_pid);
+        BOOL focused = f.top && root && fg_pid == game_pid && !IsIconic(root) &&
+                       (root == f.top || mc_title_is_game(root));
+        if (focused && (root != rect_of || now - rect_time > 200)) {
+            have_rect = mc_picture_rect(root, &r);
+            rect_of = root;
+            rect_time = now;
+        }
         POINT pt = {0};
-        HWND fg = GetForegroundWindow();
-        BOOL in_game = f.top && (fg == f.top || GetAncestor(fg, GA_ROOT) == f.top) && !IsIconic(f.top) &&
-                       mc_picture_rect(f.top, &r) && GetCursorPos(&pt) && PtInRect(&r, pt);
-        if (!in_game) {             /* another window, the menu bar, a second screen: leave the pointer alone */
+        if (!focused || !have_rect || !GetCursorPos(&pt)) {   /* another window in front: leave the pointer alone */
+            if (mc_active) mc_say(L"Paused: the game is not in front (the mouse is normal again).");
             mc_release();
+            rect_of = NULL;
             Sleep(f.top ? 20 : 250);
             continue;
         }
+        if (!mc_active) {
+            if (!PtInRect(&r, pt)) {   /* starts once the pointer is over the picture (not the menu or title bar) */
+                Sleep(10);
+                continue;
+            }
+            InterlockedExchange(&mc_active, 1);
+            mc_say(L"Active: the mouse turns the camera.");
+        }
         LONG width = r.right - r.left;
-        if (!InterlockedExchange(&mc_active, 1) || width != mc_active_width) {
+        if (width != mc_active_width) {
             mc_pointer_apply(width);   /* again when the window changes size */
             mc_active_width = width;
         }
-        /* Keep the pointer near the middle like a clock hand: when it is more than half a period away, move it
-           back by exactly one period (512 x 384 pixels of the game picture). The game patch undoes any jump of
-           that size (see cave.c, WRAP_X / WRAP_Y), so the camera never sees it, at any mouse speed. */
-        int cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
-        int wrap_x = (int)((r.right - r.left) * MC_WRAP_X / 1280.0 + 0.5);
-        int wrap_y = (int)((r.bottom - r.top) * MC_WRAP_Y / 720.0 + 0.5);
-        int nx = pt.x, ny = pt.y;
-        if (nx - cx > wrap_x / 2) nx -= wrap_x; else if (cx - nx > wrap_x / 2) nx += wrap_x;
-        if (ny - cy > wrap_y / 2) ny -= wrap_y; else if (cy - ny > wrap_y / 2) ny += wrap_y;
-        if (nx != pt.x || ny != pt.y) SetCursorPos(nx, ny);
+        BOOL escaped = !PtInRect(&r, pt);
+        if (mc_wrap(&r, &pt)) {
+            SetCursorPos(pt.x, pt.y);
+            if (escaped && escapes++ % 50 == 0)
+                mc_say(L"The pointer got out of the picture (very fast move or busy PC): brought it back.");
+        }
         Sleep(1);
     }
     mc_release();
