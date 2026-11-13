@@ -15,3 +15,5 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+native-camera/helper/*.exe
+native-camera/**/*.ips.off

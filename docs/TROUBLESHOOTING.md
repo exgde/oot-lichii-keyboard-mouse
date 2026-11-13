@@ -2,23 +2,33 @@
 
 ## The settings file and `Apply-Settings.bat`
 
+**"Cannot bind argument to parameter 'Path' because it is an empty string"** (Portuguese Windows: *"Não é possível associar o argumento ao parâmetro 'Path' porque ele é uma cadeia de caracteres vazia"*). A bug of v1.3.0 with the PowerShell built into Windows. Download v1.4.0 and run `INSTALL.bat` (your settings file is kept).
+
+**The installer asks for a "Folder".** It did not find Lichii's data folder by itself. Open Lichii → File → Open Lichii Folders → Root Data Folder, copy the address bar of the window that opens, close Lichii, paste it into the black window and press Enter. A portable Lichii keeps it in the `user` folder next to `lichii.exe`; giving the `lichii.exe` folder also works.
+
 **I cannot find the settings `.ini`.** It is `OoT-Keyboard-Mouse-Settings.ini`. It is in the release zip, and after Step 3 of the [installation](INSTALLATION.md) it sits in Lichii's Root Data Folder (File → Open Lichii Folders → Root Data Folder), next to `Apply-Settings.bat`. A copy is in this repository in [`settings/`](../settings). The Lichii profile `OoT-Keyboard-Mouse.ini` (in `config\input`) is a different file: `Apply-Settings.bat` writes it for you.
 
 **`Apply-Settings.bat` says Lichii is running.** Close Lichii completely (check the system tray and Task Manager) and run it again. Lichii rewrites its settings when it exits, which would undo the change.
 
 **`Apply-Settings.bat` lists problems in my settings file.** Each line names the setting and the line number in the `.ini`. The usual causes: a misspelled setting name, a key name that does not exist (the list is at the top of the file), a number outside its range, or a line without `=`. Nothing is changed until the file is correct.
 
-**Windows shows "Windows protected your PC".** Click **More info → Run anyway**. The `.bat` and `.ps1` are plain text (right-click → Edit) and only read the `.ini` and write Lichii's `config` files. If your PC blocks scripts completely, use the "Without the script" section of [INSTALLATION.md](INSTALLATION.md).
+**Windows shows "Windows protected your PC".** Click **More info → Run anyway**. The `.bat` and `.ps1` are plain text (right-click → Edit) and only read the `.ini` and write Lichii's `config` files. If your PC blocks scripts completely, use "Install by hand (no scripts at all)" in [INSTALLATION.md](INSTALLATION.md#install-by-hand-no-scripts-at-all), or the settings program.
 
 **The window flashes and closes, or says the settings file was not found.** `Apply-Settings.bat`, `Apply-Settings.ps1` and `OoT-Keyboard-Mouse-Settings.ini` must be in the same folder, and that folder must be the Root Data Folder (the one that contains `config`). Do not run them from inside the zip: extract first.
 
-**It says `qt-config.ini` was not found, so only the profile was written.** Lichii has never run with this data folder. Start Lichii once, close it, and run `Apply-Settings.bat` again.
+**It says the files are not in the Lichii data folder yet.** It prints how to find the right folder. If Lichii has never been started on this PC, start it once and close it: that creates the folder.
 
 **I changed a key and the game still shows the old picture.** Expected: the pictures are fixed images of the default keys. See [CONFIGURATION.md](CONFIGURATION.md#after-changing-keys-update-the-icons).
 
 **I want my gamepad back.** Close Lichii and copy `config\qt-config.ini.pre-keyboard-mouse` over `config\qt-config.ini` (the script made that copy the first time you applied). Or load a gamepad profile in Configure → Controls. For the icons, remove the `ButtonPrompts-KeyboardMouse` folder from `load`.
 
 ## In the game
+
+**Native camera: the camera does not turn.** Check that `OoT-MouseCapture.exe` is open (it says "Game found"), click the game picture and press Ctrl+F9 once. `Apply-Settings.bat` must have printed `game patch : ON`; if it says the patch is missing, run `INSTALL.bat` again.
+
+**Native camera: the pointer stays visible.** Press Ctrl+F9 once with the game in front (Lichii hides the pointer; `OoT-MouseCapture` never does).
+
+**Native camera: too fast or too slow.** Change `mouse_sens` (or `mouse_sens_x` / `mouse_sens_y`) and run `Apply-Settings.bat` again. The speed does not depend on the window size.
 
 **The profile `OoT-Keyboard-Mouse` is not in the Profile list** (only matters for the backup way). The file is not in `config\input`, or Lichii was open when you copied it. Run `Apply-Settings.bat` or check the path, then close and reopen Lichii.
 

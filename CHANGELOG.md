@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.4.0 – unreleased
+
+- **Fix:** `Apply-Settings.bat` stopped at once with *"Cannot bind argument to parameter 'Path' because it is an empty string"* on Windows PowerShell 5.1 (the PowerShell built into Windows). It now finds its own folder in every case.
+- **New installer, `INSTALL.bat`:** finds Lichii's data folder by itself (or asks for it, with instructions), copies the mod there, moves other button-icon mods to `mod-backups\`, and applies the settings. Installing is now: extract, close Lichii, double-click `INSTALL.bat`. Running it again keeps your settings file.
+- `Apply-Settings.bat` explains, step by step, how to find the right folder when it is run from the wrong one, and works when the files sit next to a portable `lichii.exe` (it uses the `user` folder).
+- **New: native mouse camera** (`mouse_camera = native`, optional). A small game patch (`MouseCamera-Native`, an IPS for game version 2.0.0) reads the mouse through the game's own `nn::hid::GetMouseStates` and adds the movement to the camera's turn for that frame, after the stick curve: no curve, no top speed, the same turn for the same hand movement at any frame rate. `mouse_sens` and `mouse_invert_y` work in both modes. Needs `OoT-MouseCapture.exe` running: while the game is in front it keeps the pointer near the middle of the picture (jumps the patch undoes exactly, so fast turns never snap back) and turns off Windows mouse acceleration, and gives everything back on Alt+Tab. Default stays `stick`, which behaves as before.
+- **New settings program** (`OoT-KeyboardMouse-Config-v1.4.0.zip`, optional): a Windows program with the mod inside. Pick keys and mouse settings, click Apply: it installs or updates the mod in any Lichii fork's data folder, writes the usual settings file, applies it, and redraws the in-game key icons for the chosen keys (from three small files of the player's own `.nup`, read once). The manual ways are unchanged.
+- New `READ-ME-FIRST.txt` / `LEIA-ME.txt` in the zip, rewritten as three steps with what you will see at each one.
+
 ## v1.3.0 – 2026-11-08
 
 One settings file for everything. The mod files (icons, controls screen) are unchanged and identical to v1.0.0.

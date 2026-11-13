@@ -1,0 +1,105 @@
+OOT (Switch 2) - Keyboard and Mouse for Lichii
+==============================================
+
+Installing takes about 2 minutes: 3 steps, then play.
+
+
+STEP 1 - EXTRACT THE ZIP
+------------------------
+  Right-click the .zip file > "Extract All..." > "Extract".
+  A folder named OoT-KeyboardMouse-v1.4.0 opens, with INSTALL.bat in it.
+
+  Do not run anything from inside the zip window. Extract first.
+
+
+STEP 2 - CLOSE LICHII
+---------------------
+  Close Lichii completely (stopping the game is not enough).
+  Lichii saves its settings when it closes, which would undo the installation.
+
+
+STEP 3 - DOUBLE-CLICK INSTALL.bat
+---------------------------------
+  A black window opens and does everything:
+    - finds Lichii's data folder;
+    - copies the icons and the settings there;
+    - sets up Player 1 for keyboard and mouse.
+  It ends with "Done" in green. Press any key to close it.
+
+  If a blue box says "Windows protected your PC":
+    click "More info" > "Run anyway".
+    (INSTALL.bat is plain text: right-click > Edit shows what it does.)
+
+  If the window asks for a "Folder", your Lichii keeps its data somewhere else:
+    1. Open Lichii (no game needed).
+    2. Click File > Open Lichii Folders > Root Data Folder.
+    3. In the window that opens, click the address bar at the top and copy it (Ctrl+C).
+    4. Close Lichii, paste the address into the black window (right-click or Ctrl+V), press Enter.
+
+
+TO PLAY (every time you open the game)
+--------------------------------------
+  1. Start the game and wait until you can move the green hat kid.
+     The first time can take a few minutes (the emulator prepares the graphics).
+  2. Click ONCE on the game picture.
+  3. Press Ctrl + F9 ONCE. The pointer disappears and the mouse turns the camera.
+
+  Ctrl+F9 switches on and off, so press it only once.
+  If the pointer comes back, press it again. Alt+Tab gives the normal mouse back.
+
+
+"NATIVE" CAMERA (optional)
+--------------------------
+  By default the mouse stands in for the right stick (mouse_camera = stick): the camera keeps the
+  game's curve and top speed. In "native" mode the mouse turns the camera itself, 1:1, like a PC
+  game: the same hand movement always gives the same turn, fast or slow.
+
+  To switch it on:
+    1. Close Lichii.
+    2. In Lichii's data folder, open OoT-Keyboard-Mouse-Settings.ini with Notepad.
+    3. Change the line   mouse_camera   = stick   to   mouse_camera   = native   and save.
+    4. Double-click Apply-Settings.bat (same folder).
+  To play in native mode:
+    1. Open OoT-MouseCapture.exe (in Lichii's data folder) and leave it open.
+    2. Start the game, click the picture and press Ctrl+F9 once, as always.
+  OoT-MouseCapture only acts while the game is in front: it keeps the mouse in the middle of the
+  picture and turns off Windows mouse acceleration while you play. Alt+Tab or closing it puts
+  everything back. To go back: mouse_camera = stick and Apply-Settings.bat again.
+
+
+CHANGE KEYS OR MOUSE SPEED
+--------------------------
+  1. Close Lichii.
+  2. In Lichii's data folder, open OoT-Keyboard-Mouse-Settings.ini with Notepad.
+  3. Change a line (for example  button_a = shift  or  mouse_sens = 3.3) and save.
+  4. Double-click Apply-Settings.bat (same folder).
+  Every option is explained inside the file. If a line is wrong, Apply-Settings says which one
+  and changes nothing. The key pictures inside the game always show the default keys.
+
+
+DEFAULT KEYS
+------------
+  W A S D = move (hold Z to walk)   mouse = camera
+  left click = attack   right click = use item   middle click = centre the camera
+  Shift = target   Space = action   C = B   R = X   Q / E = L / R
+  1 2 3 4 = d-pad   Enter = menu (+)   Tab = map (-)
+
+
+SOMETHING WENT WRONG?
+---------------------
+  "Lichii is open": close Lichii completely and run it again.
+  "A file of the mod is missing": you ran it from inside the zip. Extract first (Step 1).
+  "Cannot bind argument to parameter 'Path' because it is an empty string": that was a bug in
+     version 1.3. Download this version again and run INSTALL.bat.
+  Still Switch or PlayStation icons: restart the game. Only one ButtonPrompts- folder may be in
+     load\0400486024DEC000 (the installer moves the others to mod-backups).
+  The mouse does not turn the camera: click the game picture and press Ctrl+F9 once.
+
+
+UNINSTALL
+---------
+  Close Lichii. In Lichii's data folder delete load\0400486024DEC000\ButtonPrompts-KeyboardMouse
+  and load\0400486024DEC000\MouseCamera-Native. To get your gamepad back, copy
+  config\qt-config.ini.pre-keyboard-mouse over config\qt-config.ini.
+
+The icon files come from the game and remain Nintendo's property: use them only with a copy you own.

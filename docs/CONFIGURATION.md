@@ -29,6 +29,7 @@ Format: `name = value`, one per line. A `;` starts a comment. Delete a line to g
 | `mouse_sens` | `5.0` | camera speed, `1.0` (slow) … `10.0` (fast). The number × 10 is Lichii's sensitivity (1–100), so `5.0` is its default 50 |
 | `mouse_sens_x`, `mouse_sens_y` | empty | left/right and up/down speed on their own (empty = use `mouse_sens`) |
 | `mouse_invert_y` | `false` | `true`: moving the mouse up looks down |
+| `mouse_camera` | `stick` | `stick`: the mouse stands in for the right stick (the game's curve and top speed). `native`: the mouse turns the camera itself, 1:1 (see [Native camera](#native-camera)) |
 | `mouse_deadzone_boost` | `20` | 0–100, Lichii's "deadzone counterweight" (see [Mouse speed and feel](#mouse-speed-and-feel)) |
 | `mouse_stop_speed` | `18` | 0–100, Lichii's "decay strength": higher = the camera stops sooner |
 | `mouse_min_decay` | `6` | 0–100, Lichii's "minimum decay" |
@@ -93,6 +94,18 @@ After editing, **Load** the profile again in Configure → Controls (or copy the
 ### After changing keys: update the icons
 
 The icons drawn in the game (the keys shown in the interface) are pictures of the default keys and do not change by themselves, whether you rebind in the settings file, in the Lichii UI or in the profile. To make them show your keys, edit the layout in `tools/build_fonts_kbm.py` (function `glyph_map`), `tools/build_mods_kbm.py` (`symbols`) and `tools/make_ctrl_kbm.py` (`KEY`), then build the mod again: [BUILD-THE-MOD.md](BUILD-THE-MOD.md).
+
+## Native camera
+
+With `mouse_camera = native`, `Apply-Settings.bat`:
+
+- switches on the game patch `load\0400486024DEC000\MouseCamera-Native\exefs\E0F3CCFAF50065AE4EA01EB5AEB13B1A45DA3348.ips` (with `stick` it is renamed to `.ips.off`), and writes your speed into it;
+- sets Lichii's `mouse_enabled = true`, so the game receives the real mouse;
+- unbinds the right stick for Player 1 (with `mouse_enabled`, Lichii turns "mouse moved while a button is held" into right-stick input, so attacking would move the camera).
+
+Speed: `mouse_sens` × 0.012 degrees per mouse count (`5.0` = 0.06°, about 15 cm of mouse for a full turn at 1600 DPI). `OoT-MouseCapture.exe` sets the Windows pointer speed so that one mouse count is one pixel of the game's 1280×720 picture, so this holds at any window size. The `mouse_deadzone_boost`, `mouse_stop_speed` and `mouse_min_decay` values only apply to `stick`.
+
+The game still applies its own pitch limits and, when the mouse rests for a while, its usual slow return of the camera behind the green hat kid, exactly as with the stick.
 
 ## Mouse speed and feel
 

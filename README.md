@@ -1,119 +1,159 @@
-# OOT (Switch 2): keyboard and mouse on Lichii
+# OOT (Switch 2): keyboard and mouse for Lichii
 
-Play *OOT* (Nintendo Switch 2, title ID `0400486024DEC000`) on **Lichii** (an Eden/yuzu fork) with a **keyboard and mouse**: the mouse turns the camera and attacks, WASD moves, and the game's interface shows the matching keys instead of controller buttons.
+Play *OOT* (Nintendo Switch 2) on **Lichii**, or any Lichii fork, with a **keyboard and mouse**, like a PC game.
 
-**Download:** open the [latest release](../../releases/latest) and click **`OoT-KeyboardMouse-v1.3.0.zip`** under **Assets**. It has everything. Then follow [Download and install](#download-and-install) (5 steps). Keys and mouse speed are set in [one text file](#change-keys-and-mouse-speed).
+- **W A S D** move the green hat kid, the **mouse** turns the camera, **left click** attacks.
+- The game itself shows **keyboard and mouse icons** instead of controller buttons: on screen, in the menus, on the ocarina song sheet and on the "Basic Controls" screen.
+- **Change any key and the mouse speed**, with a small program (clicks) or a text file (Notepad).
+- **Two camera modes:** *As the stick* (the mouse acts like the right stick) or *Native* (the mouse turns the camera itself, 1:1, like a PC game).
 
-| Part | What it does | Needs a rebuilt Lichii? |
-|---|---|---|
-| **Settings file** (`settings/`) | one plain-text `.ini` for every key and the mouse speed, plus `Apply-Settings.bat` that writes it into Lichii (also builds the input profile) | no |
-| **Icon mod** (`ButtonPrompts-KeyboardMouse`) | replaces the button icons, the HUD buttons, the ocarina song-sheet notes and the "Basic Controls" screen with keyboard and mouse art | no |
-| **Lichii patches** (`lichii-patches/`) | mouse acceleration; mouse panning turns on by itself and the cursor hides; a "Keyboard and mouse" option for the icons | yes (optional) |
-| **Tools** (`tools/`) | build the mod from **your own** `.nup`, so you can change the keys and redo the icons | no |
+> **[⬇ Download from the latest release](../../releases/latest)** (scroll down to **Assets**)
 
-> The patches are not part of any prebuilt Lichii release. If you do not compile the emulator yourself, skip them: the settings file and the icon mod work on any build (tested on Fritchii v4), you just press **Ctrl+F9** once at every launch for mouse panning, with **"Hide mouse on inactivity"** enabled to hide the cursor. With an unpatched build the `ButtonPrompts-KeyboardMouse` folder is applied as an ordinary mod, so keep it as the only `ButtonPrompts-*` folder.
+---
 
-> Fan project, not affiliated with Nintendo or with Lichii/Eden. Read the [NOTICE](NOTICE.md).
+## 1. Which file do I download?
 
-## Default keys
+Pick **one** of the two:
 
-| In-game action | Switch | Keyboard / mouse |
-|---|---|---|
-| Move | left stick | **W A S D** (hold **Z** to walk slowly) |
-| Rotate Camera | right stick | **move the mouse** |
-| Reset Camera (Press) | press the right stick | **middle click** |
-| Attack | Y | **left click** |
-| Use Item | ZR | **right click** |
-| Target | ZL | **Shift** (hold) |
-| Actions / Dash (Hold) | A | **Space** |
-| (no label in game) | B | **C** |
-| (no label in game) | X | **R** |
-| Quick Select Items | L / R | **Q / E** |
-| Toggle Accessory / Play Ocarina / Talk to Navi / Toggle Boots | D-pad up / left / right / down | **1 / 2 / 3 / 4** |
-| Open Menu | + | **Enter** |
-| Open Map | − | **Tab** |
+| File | Who it is for |
+|---|---|
+| **`OoT-KeyboardMouse-Config-v1.4.0.zip`** | **Most people.** A small program: you click the keys you want and press **Apply**. It installs everything for you, and when you change a key it also redraws the key icons inside the game. |
+| **`OoT-KeyboardMouse-v1.4.0.zip`** | People who prefer no program. A one-click installer (`INSTALL.bat`); keys and mouse are changed in a text file. |
 
-Ctrl and Alt are not used on purpose: in Lichii, Ctrl+Q quits the emulator and Alt opens the menu bar. B and X have no text on the game's controls screen, so check in game what they do.
+**You need:** Windows, and Lichii (or a fork such as Fritchii) with OOT for Switch 2, version 2.0.0, already working (`[0400486024dec000][v131072]`).
 
-## Download and install
+---
 
-**Where are the mod files?** They come from the game, so they are not in the code folders of this page. They are in the zip on the **Releases** page:
+## 2. Install
 
-1. Open the [latest release](../../releases/latest).
-2. Scroll down to **Assets** and click **`OoT-KeyboardMouse-v1.3.0.zip`**.
+### With the program (recommended)
 
-That one zip has everything: the icons, the settings file where you change keys and mouse speed, and the script that applies it, already in the right folders.
+1. Download **`OoT-KeyboardMouse-Config-v1.4.0.zip`**.
+2. **Extract it:** right-click the zip → **Extract All…** → **Extract**.
+3. **Close Lichii** completely.
+4. Double-click **`OoT-KeyboardMouse-Config.exe`**.
+   If a blue box says *"Windows protected your PC"*, click **More info** → **Run anyway**.
+5. Look at **"Lichii data folder"** at the top. If it says *(not found)*, click **Change…** and pick it.
+   *Where is it?* Open Lichii and click **File → Open Lichii Folders → Root Data Folder**: the window that opens is that folder. For a portable Lichii, just pick the folder that has `lichii.exe`.
+6. Choose your keys, or keep the defaults (see [Change keys and mouse](#4-change-keys-and-mouse)).
+7. Click **Apply** and wait for **"Done"**.
 
-Now follow these 5 steps.
+### Without the program (manual)
 
-**Step 1 – Extract the zip**
+1. Download **`OoT-KeyboardMouse-v1.4.0.zip`**.
+2. **Extract it:** right-click the zip → **Extract All…** → **Extract**.
+3. **Close Lichii** completely.
+4. In the extracted folder, double-click **`INSTALL.bat`**. A black window finds Lichii's data folder, copies everything and sets up the keyboard and mouse. It ends with **"Done"**.
+   If it asks for a *"Folder"*: open Lichii, click **File → Open Lichii Folders → Root Data Folder**, copy the address bar of that window (**Ctrl+C**), close Lichii, paste it into the black window and press **Enter**.
 
-Right-click the zip → **Extract All**. Do not drag files out of the zip window: extract first.
+Step-by-step guide, with what you will see at each step: [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
-**Step 2 – Open Lichii's data folder**
+---
 
-Open Lichii and click **File → Open Lichii Folders → Root Data Folder**. A Windows folder opens. Leave it open next to the extracted one.
+## 3. Play (every time)
 
-**Step 3 – Copy everything into it**
+1. Start the game in Lichii and wait until you can move.
+2. **Click once** on the game picture.
+3. Press **Ctrl + F9** once. The mouse pointer disappears and the mouse now turns the camera.
 
-In the extracted folder press **Ctrl+A** and drag it all into the window from Step 2. If Windows says the destination already contains a folder with that name, click **Yes** (or **Continue**): it only adds our files and deletes nothing of yours.
+Ctrl+F9 switches on and off, so press it only once; if the pointer comes back, press it again. **Alt+Tab** always gives you the normal mouse back.
 
-```
-Root Data Folder
-├─ OoT-Keyboard-Mouse-Settings.ini        ← your keys and mouse speed (edit this)
-├─ Apply-Settings.bat                     ← double-click to apply them
-├─ load\0400486024DEC000\ButtonPrompts-KeyboardMouse\romfs\...   ← the icons
-└─ config\input\OoT-Keyboard-Mouse.ini
-```
+**Native camera only:** before starting the game, also open **`OoT-MouseCapture.exe`** (it is in Lichii's data folder) and leave it open.
 
-**Step 4 – Apply the settings**
+### Default controls
 
-**Close Lichii**, then double-click **`Apply-Settings.bat`** in the Root Data Folder. A black window shows the keys it applied and ends with **Done**. This sets up Player 1 for keyboard and mouse and keeps a copy of your old settings (`config\qt-config.ini.pre-keyboard-mouse`).
+| In the game | Keyboard / mouse |
+|---|---|
+| Move | **W A S D** (hold **Z** to walk slowly) |
+| Camera | **move the mouse** |
+| Reset camera | **middle click** |
+| Attack | **left click** |
+| Use item | **right click** |
+| Target (hold) | **Shift** |
+| Action / hold to run | **Space** |
+| B / X (no label in the game) | **C** / **R** |
+| Switch items | **Q / E** |
+| Accessory / Ocarina / Navi / Boots | **1 / 2 / 3 / 4** |
+| Menu / Map | **Enter** / **Tab** |
 
-If Windows shows a blue "Windows protected your PC" box, click **More info → Run anyway** (the `.bat` is plain text; right-click → Edit to read it).
+Ctrl and Alt are left free on purpose: in Lichii, Ctrl+Q quits and Alt opens the menu bar.
 
-**Step 5 – Play (repeat this every time you open the game)**
+---
 
-1. Start the game and wait until you can move the green hat kid.
-2. **Click once on the game window.**
-3. Press **Ctrl + F9** one time.
-4. Move the mouse: the camera turns and the cursor disappears after a few seconds.
+## 4. Change keys and mouse
 
-Ctrl+F9 works like a switch, so press it only once. If the cursor came back, press it again.
+**With the program:** close Lichii, open `OoT-KeyboardMouse-Config.exe`, change what you want, click **Apply**.
 
-**Not working?**
+- **Buttons** and **Movement** tabs: for each action, pick a key from the list, or click **Press a key…** and press it (or click with a mouse button).
+- **Mouse and camera** tab: camera mode, camera speed (also separately left/right and up/down), invert up/down, hide the pointer.
+- When you change keys, the in-game key icons are redrawn for them. For that the program needs your game file (`.nup`) once: it finds it by itself in Lichii's game folders, or asks you to pick it.
 
-- **`Apply-Settings.bat` says Lichii is running:** close Lichii completely and run it again.
-- **It reports a problem in the settings file:** it names the line; fix it and run again. Nothing is changed until the file is correct.
-- **Cursor still visible:** click the game window, press Ctrl+F9 once, and keep `hide_cursor = true` in the settings file.
-- **Icons still look like the Switch:** check that `load\0400486024DEC000\ButtonPrompts-KeyboardMouse` is in the Root Data Folder, that no other folder starting with `ButtonPrompts-` is inside `0400486024DEC000`, then close and reopen the game.
-- **No "Root Data Folder" in the File menu:** right-click the game → **Open Mod Data Location**, then go up two folders: that is the Root Data Folder.
-
-More help: [docs/INSTALLATION.md](docs/INSTALLATION.md) and [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
-
-## Change keys and mouse speed
-
-Open **`OoT-Keyboard-Mouse-Settings.ini`** with Notepad, change a line, save, close Lichii and double-click **`Apply-Settings.bat`** again:
+**Without the program:** close Lichii, open **`OoT-Keyboard-Mouse-Settings.ini`** (in Lichii's data folder) with Notepad, change a line and save, then double-click **`Apply-Settings.bat`** in the same folder:
 
 ```ini
-button_a  = space          ; change to: shift, f, mouse_back ...
-button_y  = mouse_left
-mouse_sens = 5.0           ; camera speed, 1.0 (slow) ... 10.0 (fast)
-mouse_invert_y = false
+button_a     = space        ; try: shift, f, mouse_back ...
+button_y     = mouse_left
+mouse_sens   = 5.0          ; camera speed, 1.0 (slow) ... 10.0 (fast)
+mouse_camera = stick        ; stick or native
 ```
 
-Every key, the mouse values and what they mean are listed in [docs/CONFIGURATION.md](docs/CONFIGURATION.md). One limit: the key pictures drawn inside the game are fixed images of the default keys, so after you rebind a key the game still shows the old picture until you [rebuild the icons](docs/CONFIGURATION.md#after-changing-keys-update-the-icons) from your own game file.
+Every option is explained inside the file and in [docs/CONFIGURATION.md](docs/CONFIGURATION.md). In this way the key icons in the game keep showing the default keys.
 
-## Documentation
+Both ways read and write the **same** settings file, so you can switch between them at any time.
 
-- [Installation](docs/INSTALLATION.md)
-- [Configuration: the settings file, keys, mouse speed, acceleration](docs/CONFIGURATION.md)
+---
+
+## 5. Camera modes
+
+| Mode | What it feels like |
+|---|---|
+| **As the stick** (default) | The mouse stands in for the right stick: the camera keeps the game's own curve and top speed. |
+| **Native** | The mouse turns the camera itself, **1:1**, like a PC game: the same hand movement always gives the same turn, slow or fast, at any frame rate. Needs `OoT-MouseCapture.exe` open while you play. |
+
+How Native works (a small patch in the game and a mouse helper): [docs/NATIVE-CAMERA.md](docs/NATIVE-CAMERA.md).
+
+---
+
+## Something is wrong?
+
+| Problem | Fix |
+|---|---|
+| "Lichii is open" | Close Lichii completely (check the taskbar) and try again. |
+| "Cannot bind argument to parameter 'Path'" | A bug of version 1.3. Download version 1.4 and install again (your settings are kept). |
+| The mouse does not turn the camera | Click the game picture and press **Ctrl+F9** once. In Native mode, check that `OoT-MouseCapture.exe` is open. |
+| Still Switch or PlayStation buttons on screen | Restart the game. Only one button-icon mod can be active; the installers move the others to the `mod-backups` folder. |
+| I want my gamepad back | Close Lichii and copy `config\qt-config.ini.pre-keyboard-mouse` over `config\qt-config.ini` in Lichii's data folder. |
+
+More answers: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+**Uninstall:** close Lichii; in Lichii's data folder delete `load\0400486024DEC000\ButtonPrompts-KeyboardMouse` and `load\0400486024DEC000\MouseCamera-Native`.
+
+---
+
+## What is in this repository
+
+| Folder | What it is |
+|---|---|
+| [`settings/`](settings) | The manual way: `INSTALL.bat`, `Apply-Settings.bat`, the settings file and the Lichii input profile. |
+| [`configurator/`](configurator) | Source of the settings program `OoT-KeyboardMouse-Config.exe`. |
+| [`native-camera/`](native-camera) | The Native camera: the game patch (`MouseCamera-Native`, built and source) and the mouse helper `OoT-MouseCapture.exe` (source). |
+| [`tools/`](tools) | Build the icon mod from **your own** game file, and build the release zips. |
+| [`release-notes/`](release-notes) | The read-me files that go inside the zips. |
+| [`lichii-patches/`](lichii-patches) | Optional changes for people who compile Lichii themselves. Not needed. |
+| [`docs/`](docs) | The guides below. |
+
+The icon files come from the game, so they are only in the release zips, not in these folders.
+
+### Guides
+
+- [Installation, step by step](docs/INSTALLATION.md)
+- [Every setting explained](docs/CONFIGURATION.md)
 - [Key mapping](docs/KEY-MAPPING.md)
-- [Build the mod from your own game](docs/BUILD-THE-MOD.md)
-- [Lichii patches](lichii-patches/README.md)
+- [Native camera: how it works](docs/NATIVE-CAMERA.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Build the mod and the program yourself](docs/BUILD-THE-MOD.md)
 - [Changelog](CHANGELOG.md)
 
 ## License
 
-Tools, profile and documentation: MIT ([LICENSE](LICENSE)). The Lichii patches are derived from Eden/yuzu and follow GPL-3.0-or-later. The texture and font files inside the release are derived from the game and remain Nintendo's property: use them only with a copy you own.
+Code, scripts and documentation: MIT ([LICENSE](LICENSE)). The Lichii patches are derived from Eden/yuzu and follow GPL-3.0-or-later. The icon files in the release are derived from the game and remain Nintendo's property: use them only with a copy you own. Fan project, not affiliated with Nintendo or with Lichii/Eden ([NOTICE](NOTICE.md)). Made with the help of AI (Claude).

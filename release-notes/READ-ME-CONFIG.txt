@@ -1,0 +1,46 @@
+OOT (Switch 2) - Keyboard and Mouse settings program for Lichii
+==============================================================
+
+This program installs the keyboard + mouse mod and lets you change keys and mouse settings
+with clicks instead of editing a text file. It works with Lichii and its forks.
+(You do not need the other zip: this program has the mod inside.)
+
+
+HOW TO USE
+----------
+  1. Extract this zip (right-click > "Extract All..." > "Extract").
+  2. Close Lichii completely.
+  3. Double-click OoT-KeyboardMouse-Config.exe.
+     If a blue box says "Windows protected your PC": "More info" > "Run anyway".
+  4. Check the "Lichii data folder" at the top. If it says "(not found)", click "Change..." and pick it:
+     in Lichii, File > Open Lichii Folders > Root Data Folder shows where it is
+     (portable Lichii: pick the folder of lichii.exe).
+  5. Choose your keys:
+     - "Buttons" and "Movement" tabs: type or pick a key, or click "Press a key..." and press it
+       (or click a mouse button in that small window).
+     - "Mouse and camera" tab: camera mode, camera speed, invert up/down.
+  6. Click Apply. Wait for "Done".
+  7. Start the game, click its picture once and press Ctrl+F9 once (every launch).
+
+When you change keys, the program also redraws the key icons inside the game for your keys.
+For that it needs your game file (the .nup of OOT for Switch 2) once: it looks for it by itself
+in Lichii's game folders, and asks you to pick it if it cannot find it.
+
+
+CAMERA MODES
+------------
+  As the stick: the mouse stands in for the right stick, with the game's own curve and top speed.
+  Native:       the mouse turns the camera itself, 1:1, like a PC game.
+                Before playing, open OoT-MouseCapture.exe (in Lichii's data folder) and leave it open.
+                Alt+Tab or closing it gives the normal mouse back.
+
+
+GOOD TO KNOW
+------------
+  - The program writes the same OoT-Keyboard-Mouse-Settings.ini that the manual way uses, so you can
+    switch between the program and the file at any time.
+  - Lichii must be closed when you click Apply (it rewrites its settings when it closes).
+  - Other button-icon mods (PlayStation, Xbox, Steam Deck) are moved to the "mod-backups" folder,
+    because only one can be active.
+  - Your old Lichii settings are kept as config\qt-config.ini.pre-keyboard-mouse.
+  - The "Basic Controls" screen keeps the default key layout; the HUD and menu icons follow your keys.

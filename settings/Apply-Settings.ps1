@@ -8,6 +8,9 @@
     2. Writes the Lichii input profile  config\input\OoT-Keyboard-Mouse.ini.
     3. Writes the same keys and the mouse values straight into config\qt-config.ini
        (Player 1), after saving a copy as config\qt-config.ini.pre-keyboard-mouse.
+    4. mouse_camera = native: switches on the game patch in load\0400486024DEC000\MouseCamera-Native
+       (with your speed and invert written into it) and the real mouse (mouse_enabled).
+       mouse_camera = stick: switches that patch off again.
     Nothing is written if the settings file has a mistake.
 
   Options (for testing): -Root <folder>   Lichii data folder (default: the folder of this script)
@@ -17,15 +20,48 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Root = $PSScriptRoot,
+    [string]$Root = '',
     [string]$Settings = '',
     [switch]$DryRun,
     [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
+# Windows PowerShell 5.1 leaves $PSScriptRoot empty in param() defaults, so find the script folder here.
+if (-not $Root) { $Root = $PSScriptRoot }
+if (-not $Root) { $Root = Split-Path -Parent $MyInvocation.MyCommand.Definition }
+if (-not $Root) { $Root = (Get-Location).Path }
 $inv = [Globalization.CultureInfo]::InvariantCulture
 if (-not $Settings) { $Settings = Join-Path $Root 'OoT-Keyboard-Mouse-Settings.ini' }
+
+# ---------------------------------------------------------------- is this the Lichii data folder?
+# It is the folder that holds config\qt-config.ini. Portable Lichii keeps it in a "user" folder next to lichii.exe,
+# so files copied next to lichii.exe still work.
+if (-not (Test-Path -LiteralPath (Join-Path $Root 'config\qt-config.ini')) -and
+    (Test-Path -LiteralPath (Join-Path $Root 'user\config\qt-config.ini'))) {
+    $Root = Join-Path $Root 'user'
+}
+if (-not (Test-Path -LiteralPath (Join-Path $Root 'config\qt-config.ini')) -and -not $DryRun) {
+    $appdata = Join-Path $env:APPDATA 'lichii'
+    Write-Host ''
+    Write-Host '  These files are not in the Lichii data folder yet.' -ForegroundColor Red
+    Write-Host ('  This folder: ' + $Root)
+    Write-Host ''
+    Write-Host '  How to find the right folder:' -ForegroundColor Cyan
+    Write-Host '    1. Open Lichii (no game needed).'
+    Write-Host '    2. Click File > Open Lichii Folders > Root Data Folder.'
+    Write-Host '       A folder opens that has "config", "load" and "nand" inside.'
+    if (Test-Path -LiteralPath (Join-Path $appdata 'config\qt-config.ini')) {
+        Write-Host ('       On this PC it is most likely: ' + $appdata) -ForegroundColor Yellow
+    }
+    Write-Host '    3. Close Lichii.'
+    Write-Host '    4. Copy everything from the download into that folder (say Yes to replace).'
+    Write-Host '    5. Double-click Apply-Settings.bat there.'
+    Write-Host ''
+    Write-Host '  Never started Lichii on this PC? Start it once and close it: it creates the folder.'
+    Write-Host ''
+    exit 1
+}
 
 function Fail([string[]]$messages) {
     Write-Host ''
@@ -72,7 +108,7 @@ $defaults = [ordered]@{
     'dpad_up' = '1'; 'dpad_left' = '2'; 'dpad_right' = '3'; 'dpad_down' = '4'
     'button_home' = 'none'; 'button_screenshot' = 'none'
     'move_up' = 'w'; 'move_down' = 's'; 'move_left' = 'a'; 'move_right' = 'd'; 'walk_key' = 'z'; 'walk_speed' = '0.5'
-    'mouse_sens' = '5.0'; 'mouse_sens_x' = ''; 'mouse_sens_y' = ''; 'mouse_invert_y' = 'false'
+    'mouse_sens' = '5.0'; 'mouse_sens_x' = ''; 'mouse_sens_y' = ''; 'mouse_invert_y' = 'false'; 'mouse_camera' = 'stick'
     'mouse_deadzone_boost' = '20'; 'mouse_stop_speed' = '18'; 'mouse_min_decay' = '6'; 'hide_cursor' = 'true'
 }
 
@@ -117,6 +153,11 @@ function ConvertTo-Number([string]$text, [double]$min, [double]$max, [string]$na
     }
     return $d
 }
+function ConvertTo-Choice([string]$text, [string[]]$choices, [string]$name) {
+    $t = $text.Trim().ToLowerInvariant()
+    if ($t -in $choices) { return $t }
+    $errors.Add("line $(Get-Line $name): '$name' must be one of: $($choices -join ', '); found '$text'"); return $null
+}
 function ConvertTo-Bool([string]$text, [string]$name) {
     switch ($text.Trim().ToLowerInvariant()) {
         { $_ -in 'true', 'yes', 'on', '1' } { return $true }
@@ -145,6 +186,8 @@ $stopSpeed = ConvertTo-Number (Get-Setting 'mouse_stop_speed') 0 100 'mouse_stop
 $minDecay = ConvertTo-Number (Get-Setting 'mouse_min_decay') 0 100 'mouse_min_decay' $true
 $invertY = ConvertTo-Bool (Get-Setting 'mouse_invert_y') 'mouse_invert_y'
 $hideCursor = ConvertTo-Bool (Get-Setting 'hide_cursor') 'hide_cursor'
+$camera = ConvertTo-Choice (Get-Setting 'mouse_camera') @('stick', 'native') 'mouse_camera'
+$native = ($camera -eq 'native')
 
 if ($errors.Count -gt 0) {
     Fail (@("The settings file has $($errors.Count) problem(s). Nothing was changed.") + @($errors))
@@ -170,6 +213,11 @@ $lstick = 'engine:analog_from_button,right:' + (Esc $bind['move_right']) + ',mod
     ',modifier:' + (Esc $bind['walk_key'])
 $rstick = 'engine:mouse,axis_x:0,axis_y:1,threshold:0.500000,range:1.000000,deadzone:0.000000'
 if ($invertY) { $rstick += ',invert_y:-' }
+if ($native) {
+    # The game patch reads the mouse itself. The right stick must not use the mouse: with mouse panning off,
+    # Lichii turns "mouse moved while a button is held" into right-stick input (so attacking would move the camera).
+    $rstick = 'engine:analog_from_button,up:' + (Esc $none) + ',down:' + (Esc $none) + ',left:' + (Esc $none) + ',right:' + (Esc $none) + ',modifier:' + (Esc $none) + ',modifier_scale:0.500000'
+}
 
 $pairs = @(
     @('button_a', $bind['button_a']), @('button_b', $bind['button_b']), @('button_x', $bind['button_x']), @('button_y', $bind['button_y']),
@@ -227,6 +275,13 @@ function Set-QtValue([System.Collections.Generic.List[string]]$lines, [string]$s
 function Get-Sens([double]$scale) { return [int][math]::Min(100, [math]::Max(1, [math]::Round($scale * 10, [MidpointRounding]::AwayFromZero))) }
 
 $qtPath = Join-Path $Root 'config\qt-config.ini'
+$buildId = 'E0F3CCFAF50065AE4EA01EB5AEB13B1A45DA3348'
+$ipsPath = Join-Path $Root ('load\0400486024DEC000\MouseCamera-Native\exefs\' + $buildId + '.ips')
+$ipsOff = $ipsPath + '.off'
+# Camera speed in native mode: degrees per mouse step. OoT-MouseCapture sets the Windows pointer speed so that one
+# step of the mouse is one pixel of the game's 1280x720 picture, so this is degrees per mouse count.
+# mouse_sens 5 = 0.06 degrees: about 15 cm of mouse for a full turn at 1600 DPI.
+function Get-NativeDegrees([double]$scale) { return $scale * 0.012 }
 $profilePath = Join-Path $Root ('config\input\' + $profileName + '.ini')
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 
@@ -234,6 +289,11 @@ $utf8 = New-Object System.Text.UTF8Encoding($false)
 $running = @(Get-Process | Where-Object { $_.ProcessName -match '^(lichii|eden|yuzu|citron|sudachi|suyu|torzu)' })
 if ($running.Count -gt 0 -and -not $DryRun -and -not $Force) {
     Fail @("Lichii is running ($($running[0].ProcessName).exe). Close it first: it would overwrite these settings when it exits.")
+}
+
+if ($native -and -not (Test-Path -LiteralPath $ipsPath) -and -not (Test-Path -LiteralPath $ipsOff)) {
+    Fail @('mouse_camera = native needs the game patch, but it is not here:', $ipsPath,
+        'Copy the load folder from the download into the Lichii data folder (step 3 of the install), then run this again.')
 }
 
 # ---------------------------------------------------------------- do it
@@ -268,6 +328,7 @@ if (Test-Path -LiteralPath $qtPath) {
     Set-QtValue $list 'Controls' 'mouse_panning_decay_strength' "$([int]$stopSpeed)" ([int]$stopSpeed -eq 18)
     Set-QtValue $list 'Controls' 'mouse_panning_min_decay' "$([int]$minDecay)" ([int]$minDecay -eq 6)
     Set-QtValue $list 'UI' 'hideInactiveMouse' $(if ($hideCursor) { 'true' } else { 'false' }) $hideCursor
+    Set-QtValue $list 'Controls' 'mouse_enabled' $(if ($native) { 'true' } else { 'false' }) (-not $native)
 
     $newText = [string]::Join($eol, $list)
     if ($newText.Length -lt $text.Length * 0.9) { Fail @('Internal check failed: the new qt-config.ini would be much shorter than the old one. Nothing was written.') }
@@ -282,9 +343,36 @@ if (Test-Path -LiteralPath $qtPath) {
         Write-Host '  qt-config.ini : would be updated'
     }
 } else {
-    Write-Host '  qt-config.ini : not found, so only the profile was written.' -ForegroundColor Yellow
-    Write-Host '                  Start Lichii once, close it, run this again (or load the profile by hand:'
-    Write-Host '                  Emulation > Configure > Controls > Player 1 > Profile > Load).' -ForegroundColor Yellow
+    Write-Host '  qt-config.ini : not found (dry run only checks the settings file).' -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------- native camera patch
+# The patch carries its settings after the marker OOTMCAM1: yaw and pitch in degrees per mouse step
+# (a negative pitch inverts up/down).
+if ($native) {
+    $src = if (Test-Path -LiteralPath $ipsPath) { $ipsPath } else { $ipsOff }
+    $bytes = [IO.File]::ReadAllBytes($src)
+    $marker = [Text.Encoding]::ASCII.GetBytes('OOTMCAM1')
+    $at = -1
+    for ($i = 0; $i -le $bytes.Length - 16; $i++) {
+        $ok = $true
+        for ($j = 0; $j -lt 8; $j++) { if ($bytes[$i + $j] -ne $marker[$j]) { $ok = $false; break } }
+        if ($ok) { $at = $i + 8; break }
+    }
+    if ($at -lt 0) { Fail @("The game patch has no settings block (OOTMCAM1): $src", 'Download the mod again.') }
+    $yaw = [single](Get-NativeDegrees $sensX)
+    $pitch = [single](Get-NativeDegrees $sensY)
+    if ($invertY) { $pitch = [single](-$pitch) }   # keep it a 4-byte float for GetBytes
+    [Array]::Copy([BitConverter]::GetBytes($yaw), 0, $bytes, $at, 4)
+    [Array]::Copy([BitConverter]::GetBytes($pitch), 0, $bytes, $at + 4, 4)
+    if (-not $DryRun) {
+        [IO.File]::WriteAllBytes($ipsPath, $bytes)
+        if (Test-Path -LiteralPath $ipsOff) { Remove-Item -LiteralPath $ipsOff }
+    }
+    Write-Host ('  game patch    : ON  ' + $ipsPath)
+} elseif (Test-Path -LiteralPath $ipsPath) {
+    if (-not $DryRun) { Move-Item -LiteralPath $ipsPath -Destination $ipsOff -Force }
+    Write-Host '  game patch    : OFF (MouseCamera-Native renamed to .ips.off)'
 }
 
 # ---------------------------------------------------------------- summary
@@ -295,6 +383,8 @@ Write-Host ('    {0,-18} = {1}' -f 'walk_speed', (F6 $walkSpeed))
 Write-Host '  Mouse' -ForegroundColor Cyan
 Write-Host ('    camera speed x/y   = {0} / {1}  (Lichii values {2} / {3})' -f (F6 $sensX), (F6 $sensY), (Get-Sens $sensX), (Get-Sens $sensY))
 Write-Host ('    invert up/down     = {0}' -f $invertY)
+Write-Host ('    mouse camera       = {0}' -f $camera)
+if ($native) { Write-Host ([string]::Format($inv, '    native speed x/y   = {0:F3} / {1:F3} degrees per mouse step', (Get-NativeDegrees $sensX), (Get-NativeDegrees $sensY))) }
 Write-Host ('    deadzone boost {0}, stop speed {1}, minimum decay {2}, hide cursor {3}' -f [int]$deadzone, [int]$stopSpeed, [int]$minDecay, $hideCursor)
 
 foreach ($w in $warnings) { Write-Host ('  WARNING: ' + $w) -ForegroundColor Yellow }
@@ -306,6 +396,13 @@ if ($changed.Count -gt 0) {
     Write-Host '  default keys (see docs/CONFIGURATION.md on GitHub to redraw them).' -ForegroundColor Yellow
 }
 Write-Host ''
-Write-Host '  Done. Start Lichii. Each time you start the game: click its window, press Ctrl+F9 once.' -ForegroundColor Green
+if ($native) {
+    Write-Host '  Done. Each time you play:' -ForegroundColor Green
+    Write-Host '    1. Start OoT-MouseCapture.exe (it can stay open).' -ForegroundColor Green
+    Write-Host '    2. Start the game in Lichii, click the picture once, press Ctrl+F9 once (the pointer disappears).' -ForegroundColor Green
+    Write-Host '    Alt+Tab gives the normal mouse back.' -ForegroundColor Green
+} else {
+    Write-Host '  Done. Start Lichii. Each time you start the game: click its window, press Ctrl+F9 once.' -ForegroundColor Green
+}
 Write-Host ''
 exit 0

@@ -57,3 +57,10 @@ The game's font has a size limit (14,560 bytes). `build_fonts_kbm.py` prints the
 | `glyphlib.py`, `build_fonts_kbm.py` | the icon font and the `.bfotf` container cipher |
 | `ctrllib.py`, `make_ctrl_kbm.py`, `draw_default_art.py` | the controls-screen picture and lines |
 | `build_mods_kbm.py`, `verify_mod.py` | assemble the mod folder and check it |
+
+## Native camera patch and mouse helper
+
+- `native-camera/patch/build_native_camera_ips.py` builds `native-camera/MouseCamera-Native/exefs/<build id>.ips` with LLVM (clang + ld.lld): `cave.c` (reads the mouse with the game's `nn::hid::GetMouseStates`, turns it into degrees) and `hooks.S` (keeps every register around the call). It replaces one game instruction, `str s0, [sp, #12]` at module offset `0x625370` in the player camera update, where the right stick has just been turned into this frame's yaw and pitch change (degrees), with a branch into code placed after the game's code (`0x3C46400`). The mouse is added there, so the game applies it through its normal "turned by hand" path. `--main <decompressed main as ELF>` checks that instruction before writing. `test_cave.c` tests the mouse logic on the PC. Only game version 2.0.0 (main build `E0F3CCFAF50065AE…`).
+- `native-camera/helper/build.bat` builds `OoT-MouseCapture.exe` (Visual Studio C compiler). It keeps the pointer near the middle of the picture by moving it back by exactly 512 × 384 game pixels (like a clock hand), and the patch undoes jumps of exactly that size (`WRAP_X` / `WRAP_Y` in `cave.c`), so the two numbers must match.
+- `configurator/build_exe.py` builds the settings program `OoT-KeyboardMouse-Config.exe` and its zip (PyInstaller; the icon folder and `OoT-MouseCapture.exe` are given on the command line). `configurator/icons.py` draws the icons for any keys on top of `build_fonts_kbm.py`; with the default keys it gives the same glyphs as the shipped mod.
+- `tools/make_release.py` builds the release zip (the icons folder and `OoT-MouseCapture.exe` are given on the command line).

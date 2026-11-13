@@ -1,0 +1,46 @@
+OOT (Switch 2) - Programa de configuração de Teclado e Mouse para o Lichii
+=========================================================================
+
+Este programa instala o mod de teclado e mouse e deixa você mudar teclas e o mouse com cliques,
+sem editar arquivo de texto. Funciona com o Lichii e os forks dele.
+(Você não precisa do outro zip: o programa já tem o mod dentro.)
+
+
+COMO USAR
+---------
+  1. Extraia este zip (botão direito > "Extrair Tudo..." > "Extrair").
+  2. Feche o Lichii por completo.
+  3. Dê dois cliques em OoT-KeyboardMouse-Config.exe.
+     Se aparecer "O Windows protegeu o computador": "Mais informações" > "Executar assim mesmo".
+  4. Confira a "Lichii data folder" lá em cima. Se estiver "(not found)", clique em "Change..." e
+     escolha a pasta: no Lichii, File > Open Lichii Folders > Root Data Folder mostra qual é
+     (Lichii portátil: escolha a pasta do lichii.exe).
+  5. Escolha suas teclas:
+     - Abas "Buttons" e "Movement": digite ou escolha a tecla na lista, ou clique em
+       "Press a key..." e aperte a tecla (ou clique com um botão do mouse nessa janelinha).
+     - Aba "Mouse and camera": modo da câmera, velocidade, inverter cima/baixo.
+  6. Clique em Apply e espere aparecer "Done".
+  7. Abra o jogo, clique uma vez na imagem e aperte Ctrl+F9 uma vez (toda vez que abrir).
+
+Quando você troca teclas, o programa também redesenha os ícones das teclas dentro do jogo.
+Para isso ele precisa do arquivo do seu jogo (o .nup do OOT de Switch 2) uma vez: ele procura
+sozinho nas pastas de jogos do Lichii e, se não achar, pede para você escolher.
+
+
+MODOS DA CÂMERA
+---------------
+  As the stick: o mouse imita o analógico direito, com a curva e a velocidade máxima do jogo.
+  Native:       o mouse gira a câmera direto, 1 para 1, como num jogo de PC.
+                Antes de jogar, abra o OoT-MouseCapture.exe (na pasta de dados do Lichii) e deixe aberto.
+                Alt+Tab ou fechar ele devolve o mouse normal.
+
+
+BOM SABER
+---------
+  - O programa grava o mesmo OoT-Keyboard-Mouse-Settings.ini do jeito manual, então dá para usar
+    o programa e o arquivo de texto à vontade.
+  - O Lichii precisa estar fechado quando você clica em Apply (ele regrava as configurações ao fechar).
+  - Outros mods de ícones (PlayStation, Xbox, Steam Deck) vão para a pasta "mod-backups",
+    porque só um pode ficar ativo.
+  - Suas configurações antigas do Lichii ficam em config\qt-config.ini.pre-keyboard-mouse.
+  - A tela "Basic Controls" continua com o layout padrão; os ícones do HUD e dos menus seguem suas teclas.
