@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.4.0 – unreleased
+## v1.4.1 – 2026-11-12
+
+- **Native camera: no more small jerks or stops with other screen settings.** `OoT-MouseCapture.exe` now reads Lichii's *Aspect Ratio* setting (16:9, 4:3, 21:9, 16:10 or Stretch, including a per-game setting) and lays the picture out exactly like the emulator, and it works in real screen pixels, so Windows display scaling (125 %, 150 %) no longer breaks the exact clock-hand jumps. Before, anything other than 16:9 at 100 % scaling could make the camera jerk back a little at times or stop at the edge of the picture.
+- `OoT-MouseCapture.exe` finds the game by its emulator window (Lichii, Eden, yuzu and forks), so a browser tab with the same title is ignored.
+
+## v1.4.0 – 2026-11-12
 
 - **Fix:** `Apply-Settings.bat` stopped at once with *"Cannot bind argument to parameter 'Path' because it is an empty string"* on Windows PowerShell 5.1 (the PowerShell built into Windows). It now finds its own folder in every case.
 - **New installer, `INSTALL.bat`:** finds Lichii's data folder by itself (or asks for it, with instructions), copies the mod there, moves other button-icon mods to `mod-backups\`, and applies the settings. Installing is now: extract, close Lichii, double-click `INSTALL.bat`. Running it again keeps your settings file.

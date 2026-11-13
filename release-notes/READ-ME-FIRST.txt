@@ -7,7 +7,7 @@ Installing takes about 2 minutes: 3 steps, then play.
 STEP 1 - EXTRACT THE ZIP
 ------------------------
   Right-click the .zip file > "Extract All..." > "Extract".
-  A folder named OoT-KeyboardMouse-v1.4.0 opens, with INSTALL.bat in it.
+  A folder named OoT-KeyboardMouse-v1.4.1 opens, with INSTALL.bat in it.
 
   Do not run anything from inside the zip window. Extract first.
 

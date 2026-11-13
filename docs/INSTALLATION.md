@@ -4,8 +4,8 @@ There are two ways to install. **Pick one**; they install the same mod and use t
 
 | Way | Download | Best for |
 |---|---|---|
-| **A. The program** | `OoT-KeyboardMouse-Config-v1.4.0.zip` | Most people: choose keys with clicks; the in-game key icons follow your keys. |
-| **B. Manual** | `OoT-KeyboardMouse-v1.4.0.zip` | People who prefer no program: a one-click installer and a text file for the keys. |
+| **A. The program** | `OoT-KeyboardMouse-Config-v1.4.1.zip` | Most people: choose keys with clicks; the in-game key icons follow your keys. |
+| **B. Manual** | `OoT-KeyboardMouse-v1.4.1.zip` | People who prefer no program: a one-click installer and a text file for the keys. |
 
 Both are on the [latest release](../../releases/latest) page, under **Assets**.
 
@@ -15,7 +15,7 @@ Both are on the [latest release](../../releases/latest) page, under **Assets**.
 
 ## A. Install with the program
 
-1. **Download** `OoT-KeyboardMouse-Config-v1.4.0.zip`.
+1. **Download** `OoT-KeyboardMouse-Config-v1.4.1.zip`.
 2. **Extract it:** right-click the zip → **Extract All…** → **Extract**. A folder opens with `OoT-KeyboardMouse-Config.exe` in it.
 3. **Close Lichii** completely (stopping the game is not enough: Lichii saves its settings when it closes and would undo the changes).
 4. Double-click **`OoT-KeyboardMouse-Config.exe`**.
@@ -38,7 +38,7 @@ To change something later: close Lichii, open the program, change it, click **Ap
 
 ## B. Install manually
 
-1. **Download** `OoT-KeyboardMouse-v1.4.0.zip`.
+1. **Download** `OoT-KeyboardMouse-v1.4.1.zip`.
 2. **Extract it:** right-click the zip → **Extract All…** → **Extract**. A folder opens with `INSTALL.bat` in it.
    - Do not run anything from inside the zip window: extract first.
 3. **Close Lichii** completely.

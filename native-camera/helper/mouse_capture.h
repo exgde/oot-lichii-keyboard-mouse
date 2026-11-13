@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "winmm.lib")
@@ -69,8 +70,64 @@ static BOOL CALLBACK mc_largest_child(HWND h, LPARAM lp) {
     return TRUE;
 }
 
-/* Screen rectangle of the game picture: the emulator draws into its largest child window and keeps the
-   picture 16:9 inside it (black bars on the other sides). */
+/* ---- the emulator's "Aspect Ratio" setting: the game picture (and the mouse area the game sees) follows it ---- */
+
+/* height / width of the picture; 0 = Stretch (the whole render area). Lichii: 0 16:9, 1 4:3, 2 21:9, 3 16:10, 4 Stretch */
+static double mc_aspect = 9.0 / 16.0;
+static wchar_t mc_config_dir[MAX_PATH] = L"";   /* Lichii's data folder (has config\qt-config.ini); empty = guess */
+
+static int mc_read_aspect_setting(const wchar_t *ini, int *value) {
+    FILE *f = _wfopen(ini, L"r");
+    char line[512];
+    int found = 0;
+    if (!f) return 0;
+    while (fgets(line, sizeof(line), f))
+        if (strncmp(line, "aspect_ratio=", 13) == 0) { *value = atoi(line + 13); found = 1; }
+    fclose(f);
+    return found;
+}
+
+static int mc_try_folder(const wchar_t *dir, int *value) {
+    wchar_t p[MAX_PATH];
+    swprintf(p, MAX_PATH, L"%s\\config\\custom\\0400486024DEC000.ini", dir);   /* per-game setting first */
+    if (mc_read_aspect_setting(p, value)) return 1;
+    swprintf(p, MAX_PATH, L"%s\\config\\qt-config.ini", dir);
+    return mc_read_aspect_setting(p, value);
+}
+
+/* OoT-MouseCapture.exe sits in Lichii's data folder (the installers put it there); else portable user\ or %APPDATA%\lichii */
+static void mc_load_aspect(void) {
+    wchar_t dir[MAX_PATH], tmp[MAX_PATH];
+    int v = 0, ok = 0;
+    if (mc_config_dir[0]) ok = mc_try_folder(mc_config_dir, &v);
+    if (!ok && GetModuleFileNameW(NULL, dir, MAX_PATH)) {
+        wchar_t *s = wcsrchr(dir, L'\\');
+        if (s) *s = 0;
+        ok = mc_try_folder(dir, &v);
+        if (!ok) { swprintf(tmp, MAX_PATH, L"%s\\user", dir); ok = mc_try_folder(tmp, &v); }
+    }
+    if (!ok && GetEnvironmentVariableW(L"APPDATA", dir, MAX_PATH)) {
+        swprintf(tmp, MAX_PATH, L"%s\\lichii", dir);
+        ok = mc_try_folder(tmp, &v);
+    }
+    static const double aspects[] = {9.0 / 16.0, 3.0 / 4.0, 9.0 / 21.0, 10.0 / 16.0, 0.0};
+    mc_aspect = (ok && v >= 0 && v <= 4) ? aspects[v] : 9.0 / 16.0;
+}
+
+/* The picture inside the render area, exactly like the emulator lays it out (framebuffer_layout.cpp). */
+static void mc_fit_aspect(const RECT *r, double aspect, RECT *out) {
+    LONG w = r->right - r->left, h = r->bottom - r->top, pw = w, ph = h;
+    if (aspect > 0) {
+        if ((double)h / w > aspect) ph = (LONG)(w * aspect + 0.5);   /* window taller than the picture: bars above and below */
+        else pw = (LONG)(h / aspect + 0.5);                          /* wider: bars left and right */
+    }
+    out->left = r->left + (w - pw) / 2;
+    out->top = r->top + (h - ph) / 2;
+    out->right = out->left + pw;
+    out->bottom = out->top + ph;
+}
+
+/* Screen rectangle of the game picture: the emulator draws into its largest child window. */
 static BOOL mc_picture_rect(HWND top, RECT *out) {
     McChild c = {NULL, 0};
     RECT r, cr;
@@ -82,15 +139,18 @@ static BOOL mc_picture_rect(HWND top, RECT *out) {
         ClientToScreen(top, &b);
         SetRect(&r, a.x, a.y, b.x, b.y);
     }
-    LONG w = r.right - r.left, h = r.bottom - r.top;
-    if (w < 64 || h < 36) return FALSE;
-    LONG pw = w, ph = h;
-    if (w * 9 > h * 16) pw = h * 16 / 9; else ph = w * 9 / 16;
-    out->left = r.left + (w - pw) / 2;
-    out->top = r.top + (h - ph) / 2;
-    out->right = out->left + pw;
-    out->bottom = out->top + ph;
+    if (r.right - r.left < 64 || r.bottom - r.top < 36) return FALSE;
+    mc_fit_aspect(&r, mc_aspect, out);
     return TRUE;
+}
+
+/* Work in real screen pixels, like the emulator (otherwise Windows display scaling of 125 % / 150 % would
+   round the positions and the clock-hand jumps would no longer be exact). */
+static void mc_dpi_aware(void) {
+    HMODULE u = GetModuleHandleW(L"user32.dll");
+    typedef BOOL(WINAPI * SetCtx)(HANDLE);
+    SetCtx set = u ? (SetCtx)GetProcAddress(u, "SetProcessDpiAwarenessContext") : NULL;
+    if (!(set && set((HANDLE)-4))) SetProcessDPIAware();   /* -4 = per-monitor aware v2 */
 }
 
 /* ---- Windows pointer speed and acceleration, changed only while the game is in front ---- */
@@ -180,6 +240,8 @@ static void mc_release(void) {
 static void mc_run(DWORD pid, volatile LONG *stop) {
     HANDLE proc = pid ? OpenProcess(SYNCHRONIZE, FALSE, pid) : NULL;
     if (pid && !proc) return;
+    mc_dpi_aware();
+    mc_load_aspect();
     mc_pointer_recover();
     timeBeginPeriod(1);
     McFind f = {pid, NULL};
@@ -193,6 +255,7 @@ static void mc_run(DWORD pid, volatile LONG *stop) {
             if (now - last_search > 500) {
                 last_search = now;
                 EnumWindows(mc_find_top, (LPARAM)&f);
+                if (f.top) mc_load_aspect();               /* the game (re)started: read Aspect Ratio again */
             }
         }
         RECT r = {0};

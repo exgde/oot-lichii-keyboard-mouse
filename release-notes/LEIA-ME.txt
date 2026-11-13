@@ -7,7 +7,7 @@ Instalar leva uns 2 minutos. São 3 passos, depois é só jogar.
 PASSO 1 - EXTRAIA O ZIP
 -----------------------
   Clique com o botão direito no arquivo .zip > "Extrair Tudo..." > "Extrair".
-  Abre uma pasta chamada OoT-KeyboardMouse-v1.4.0 com o INSTALL.bat dentro.
+  Abre uma pasta chamada OoT-KeyboardMouse-v1.4.1 com o INSTALL.bat dentro.
 
   Atenção: não rode nada de dentro da janela do zip. Extraia primeiro.
 

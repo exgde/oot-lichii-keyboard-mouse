@@ -17,8 +17,8 @@ Pick **one** of the two:
 
 | File | Who it is for |
 |---|---|
-| **`OoT-KeyboardMouse-Config-v1.4.0.zip`** | **Most people.** A small program: you click the keys you want and press **Apply**. It installs everything for you, and when you change a key it also redraws the key icons inside the game. |
-| **`OoT-KeyboardMouse-v1.4.0.zip`** | People who prefer no program. A one-click installer (`INSTALL.bat`); keys and mouse are changed in a text file. |
+| **`OoT-KeyboardMouse-Config-v1.4.1.zip`** | **Most people.** A small program: you click the keys you want and press **Apply**. It installs everything for you, and when you change a key it also redraws the key icons inside the game. |
+| **`OoT-KeyboardMouse-v1.4.1.zip`** | People who prefer no program. A one-click installer (`INSTALL.bat`); keys and mouse are changed in a text file. |
 
 **You need:** Windows, and Lichii (or a fork such as Fritchii) with OOT for Switch 2, version 2.0.0, already working (`[0400486024dec000][v131072]`).
 
@@ -28,7 +28,7 @@ Pick **one** of the two:
 
 ### With the program (recommended)
 
-1. Download **`OoT-KeyboardMouse-Config-v1.4.0.zip`**.
+1. Download **`OoT-KeyboardMouse-Config-v1.4.1.zip`**.
 2. **Extract it:** right-click the zip → **Extract All…** → **Extract**.
 3. **Close Lichii** completely.
 4. Double-click **`OoT-KeyboardMouse-Config.exe`**.
@@ -40,7 +40,7 @@ Pick **one** of the two:
 
 ### Without the program (manual)
 
-1. Download **`OoT-KeyboardMouse-v1.4.0.zip`**.
+1. Download **`OoT-KeyboardMouse-v1.4.1.zip`**.
 2. **Extract it:** right-click the zip → **Extract All…** → **Extract**.
 3. **Close Lichii** completely.
 4. In the extracted folder, double-click **`INSTALL.bat`**. A black window finds Lichii's data folder, copies everything and sets up the keyboard and mouse. It ends with **"Done"**.
@@ -119,7 +119,7 @@ How Native works (a small patch in the game and a mouse helper): [docs/NATIVE-CA
 | Problem | Fix |
 |---|---|
 | "Lichii is open" | Close Lichii completely (check the taskbar) and try again. |
-| "Cannot bind argument to parameter 'Path'" | A bug of version 1.3. Download version 1.4 and install again (your settings are kept). |
+| "Cannot bind argument to parameter 'Path'" | A bug of version 1.3. Download version 1.4.1 and install again (your settings are kept). |
 | The mouse does not turn the camera | Click the game picture and press **Ctrl+F9** once. In Native mode, check that `OoT-MouseCapture.exe` is open. |
 | Still Switch or PlayStation buttons on screen | Restart the game. Only one button-icon mod can be active; the installers move the others to the `mod-backups` folder. |
 | I want my gamepad back | Close Lichii and copy `config\qt-config.ini.pre-keyboard-mouse` over `config\qt-config.ini` in Lichii's data folder. |
